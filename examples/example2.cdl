@@ -1,0 +1,72 @@
+netcdf {
+
+  // Example 2
+  // An aggregated data variable whose aggregated data comprises two fragments.
+  // Each fragment spans half of the aggregated time dimension and the whole of
+  // the other three aggregated dimensions. One fragment is stored in an
+  // external file and the other is stored in the same dataset as variable
+  // temp2. The fragment stored in the same dataset has different but
+  // equivalent units to the aggregation variable, and omits the size 1 level
+  // dimension.
+
+  dimensions:
+    // Aggregated dimensions
+    time = 12 ;
+    level = 1 ;
+    latitude = 73 ;
+    longitude = 144 ;
+    // Fragment dimensions
+    f_time = 2 ;
+    f_level = 1 ;
+    f_latitude = 1 ;
+    f_longitude = 1 ;
+    // Extra dimensions
+    i = 4 ;
+    j = 2 ;
+  variables:
+    // Data variable
+    double temp ;
+      temp:standard_name = "air_temperature" ;
+      temp:units = "K" ;
+      temp:cell_methods = "time: mean" ;
+      temp:aggregated_dimensions = "time level latitude longitude" ;
+      temp:aggregated_data = "location: aggregation_location
+                              file: aggregation_file
+                              format: aggregation_format
+                              address: aggregation_address" ;
+    // Coordinate variables
+    double time(time) ;
+      time:standard_name = "time" ;
+      time:units = "days since 2001-01-01" ;
+    double level(level) ;
+      level:standard_name = "height_above_mean_sea_level" ;
+      level:units = "m" ;
+    double latitude(latitude) ;
+      latitude:standard_name = "latitude" ;
+      latitude:units = "degrees_north" ;
+    double longitude(longitude) ;
+      longitude:standard_name = "longitude" ;
+      longitude:units = "degrees_east" ;
+    // Aggregation definition variables
+    int aggregation_location(i, j) ;
+    string aggregation_file(f_time, f_level, f_latitude, f_longitude) ;
+    string aggregation_format ;
+    string aggregation_address(f_time, f_level, f_latitude, f_longitude) ;
+    // Fragment variable
+    double temp2(time, latitude, longitude) ;
+      temp:units = "degreesC" ;
+
+  // global attributes:
+    :Conventions = "CF-1.9 CFA-0.6" ;
+  data:
+    temp = _ ;
+    time = 0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334 ;
+    aggregation_location = 6, 6,
+                           1, _,
+                           73, _,
+                           144, _ ;
+    aggregation_file = "January-June.nc", _ ;
+    aggregation_format = "nc" ;
+    aggregation_address = "temp", "temp2" ;
+    temp2 = 4.5, 3.0, 0.0, -2.6, -5.6, -10.2, _ ;
+}

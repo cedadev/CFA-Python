@@ -1,0 +1,87 @@
+netcdf {
+  // Example 6
+  // An aggregation data variable for a collection of discrete sampling geometry
+  // timeseries features that have been compressed by use of a contiguous ragged
+  // array. The three timeseries of air temperature are each from different
+  // geographical locations and comprise four, five, and six observations
+  // respectively, giving a total of fifteen observations. The timeseries from
+  // each location is stored in a separate external file.
+
+  dimensions:
+    // Aggregated dimensions
+    station = 3 ;
+    obs = 15 ;
+    // Fragment dimensions
+    f_station = 3 ;
+    // Extra dimensions
+    i = 1 ;
+    j = 3 ;
+  variables:
+    // Data variable
+    float temp(obs) ;
+    temp:standard_name = "air_temperature" ;
+    temp:units = "Celsius" ;
+    temp:coordinates = "time lat lon alt station_name" ;
+    temp:aggregated_dimensions = "obs" ;
+    temp:aggregated_data = "location: aggregation_location
+                            file: aggregation_file
+                            format: aggregation_format
+                            address: aggregation_address_temp" ;
+    // Coordinate variables
+    float time ;
+    time:standard_name = "time" ;
+    time:long_name = "time of measurement" ;
+    time:units = "days since 1970-01-01" ;
+    temp:aggregated_dimensions = "obs" ;
+    temp:aggregated_data = "location: aggregation_location
+                            file: aggregation_file
+                            format: aggregation_format
+                            address: aggregation_address_time" ;
+    float lon(station) ;
+    lon:standard_name = "longitude";
+    lon:long_name = "station longitude";
+    lon:units = "degrees_east";
+    temp:aggregated_dimensions = "obs" ;
+    temp:aggregated_data = "location: aggregation_location_latlon
+                            file: aggregation_file
+                            format: aggregation_format
+                            address: aggregation_address_lon" ;
+    float lat(station) ;
+    lat:standard_name = "latitude";
+    lat:long_name = "station latitude" ;
+    lat:units = "degrees_north" ;
+    temp:aggregated_dimensions = "obs" ;
+    temp:aggregated_data = "location: aggregation_location_latlon
+                            file: aggregation_file
+                            format: aggregation_format
+                            address: aggregation_address_lat" ;
+    // Compression encoding variable
+    int row_size(station) ;
+    row_size:long_name = "number of observations per station" ;
+    row_size:sample_dimension = "obs" ;
+    // Aggregation definition variables
+    int aggregation_location(i, j) ;
+    int aggregation_location_latlon(i, j) ;
+    string aggregation_file(f_station) ;
+    string aggregation_format ;
+    string aggregation_address_temp(f_station) ;
+    string aggregation_address_time(f_station) ;
+    string aggregation_address_lat(f_station) ;
+    string aggregation_address_lon(f_station) ;
+
+  // global attributes:
+    :Conventions = "CF-1.9 CFA-0.6" ;
+    :featureType = "timeSeries";
+  data:
+    temp = _ ;
+    time = _ ;
+    row_size = 4, 5, 6 ;
+    aggregation_location = 3, 4, 5 ;
+    aggregation_location_latlon = 1, 1, 1 ;
+    aggregation_file = "Harwell.nc", "Abingdon.nc", "Lambourne.nc" ;
+    aggregation_format = "nc" ;
+    aggregation_address_temp = "tas", "tas", "tas" ;
+    aggregation_address_time = "time", "time", "time" ;
+    aggregation_address_lat = "lat", "lat", "lat" ;
+    aggregation_address_lon = "lon", "lon", "lon" ;
+}

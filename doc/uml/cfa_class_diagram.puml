@@ -1,0 +1,52 @@
+@startuml
+
+class DataType {
+    +numpy.dtype datatype
+}
+
+class Fragment {
+    +int location
+    +string file
+    +string format
+    +string address
+    +string units
+}
+
+class AggregatedData {
+    +string location_var
+    +string file_var
+    +string format_var
+    +string address_var
+    +string units
+}
+
+abstract CFADimension {
+    +string dimension_name
+    +int size
+}
+
+class AggregatedDimension {
+}
+
+class ExtraDimension {
+}
+
+class FragmentDimension {
+}
+
+class AggregationVariable {
+    +string name
+}
+
+AggregationVariable "1" o-- "0..*" AggregatedDimension
+AggregationVariable "1" o-- "1" AggregatedData
+AggregatedData "1" o-- "1..*" Fragment
+AggregatedData "1" o-- "0..*" FragmentDimension
+AggregatedDimension "1" -- "1" FragmentDimension : ordered
+AggregatedData -- DataType
+Fragment -- DataType
+CFADimension <|-- AggregatedDimension
+CFADimension <|-- ExtraDimension
+CFADimension <|-- FragmentDimension
+
+@enduml

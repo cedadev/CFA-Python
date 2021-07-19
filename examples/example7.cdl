@@ -1,0 +1,63 @@
+netcdf {
+  // Example 7
+  // An aggregation data variable whose aggregated data represents 32-bit floats
+  // packed into 16-bit integers. When created, the aggregated data contains the
+  // 16-bit integer values 0, 5958,..., 65539. These may be subsequently unpacked
+  // to the 32-bit float values 270.0, 270.1, ..., 271.10007, which approximate
+  // the original, pre-packed 32-bit float values 270.0, 270.1, ... 271.1.
+
+  dimensions:
+    // Aggregated dimensions
+    time = 12 ;
+  variables:
+    // Data variable
+    short temp ;
+      temp:standard_name = "air_temperature" ;
+      temp:units = "K" ;
+      temp:cell_methods = "time: mean" ;
+      temp:scale_factor = 1.6785949e-05f ;
+      temp:add_offset = 270.0f ;
+      temp:aggregated_dimensions = "time" ;
+      temp:aggregated_data = "location: /aggregation/location
+                              file: /aggregation/file
+                              format: /aggregation/format
+                              address: /aggregation/address" ;
+    // Coordinate variables
+    float time(time) ;
+      time:standard_name = "time" ;
+      time:units = "days since 2001-01-01" ;
+
+  // global attributes:
+    :Conventions = "CF-1.9 CFA-0.6" ;
+  data:
+    temp = _ ;
+    time = 0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334 ;
+
+  group: aggregation {
+    dimensions:
+      // Time dimension
+      t = 6 ;
+      // Fragment dimensions
+      f_time = 2 ;
+      // Extra dimensions
+      i = 1 ;
+      j = 2 ;
+    variables:
+      // Fragment variables
+      short temp1(t) ;
+      short temp2(t) ;
+      // Aggregation definition variables
+      int location(i, j) ;
+      string file(f_time) ;
+      string format ;
+      string address(f_time) ;
+
+    data:
+      temp1 = 0, 5958, 11916, 17874, 23832, 29790 ;
+      temp2 = 35749, 41707, 47665, 53623, 59581, 65539 ;
+      location = 6, 6 ;
+      file = _, _ ;
+      format = _ ;
+      address = "/aggregation/temp1", "/aggregation/temp2" ;
+  }
+}

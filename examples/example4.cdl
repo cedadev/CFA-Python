@@ -1,0 +1,97 @@
+netcdf {
+  // Example 4
+  // An aggregated data variable whose aggregated data comprises four fragments.
+  // Each fragment spans half of the aggregated time dimension, either the
+  // northern or southern hemisphere, and the whole of the other two aggregated
+  // dimensions. The fragments are stored in external netCDF files. The
+  // aggregation definition variables are stored in a child group called
+  // aggregation. One of the fragments has been defined by two different external
+  // resources (one "local" and one "remote"), each of which is provided with its
+  // own address within its file (temp3 and t3 respectively). Either of these
+  // resources, but not both, may be used in the aggregated data.
+
+  dimensions:
+    // Aggregated dimensions
+    time = 12 ;
+    level = 1 ;
+    latitude = 73 ;
+    longitude = 144 ;
+  variables:
+    // Data variable
+    double temp ;
+      temp:standard_name = "air_temperature" ;
+      temp:units = "K" ;
+      temp:cell_methods = "time: mean" ;
+      temp:aggregated_dimensions = "time level latitude longitude" ;
+      temp:aggregated_data = "location: /aggregation/location
+                              file: /aggregation/file
+                              format: /aggregation/format
+                              address: /aggregation/address" ;
+    // Coordinate variables
+    double time(time) ;
+      time:standard_name = "time" ;
+      time:units = "days since 2001-01-01" ;
+    double level(level) ;
+      level:standard_name = "height_above_mean_sea_level" ;
+      level:units = "m" ;
+    double latitude(latitude) ;
+      latitude:standard_name = "latitude" ;
+      latitude:units = "degrees_north" ;
+    double longitude(longitude) ;
+      longitude:standard_name = "longitude" ;
+      longitude:units = "degrees_east" ;
+
+  // global attributes:
+    :Conventions = "CF-1.9 CFA-0.6" ;
+  data:
+    temp = _ ;
+    time = 0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334 ;
+    latitude = -90.0, -87.5, -85.0, -82.5, -80.0, -77.5, -75.0, -72.5, -70.0,
+               -67.5, -65.0, -62.5, -60.0, -57.5, -55.0, -52.5, -50.0, -47.5,
+               -45.0, -42.5, -40.0, -37.5, -35.0, -32.5, -30.0, -27.5, -25.0,
+               -22.5, -20.0, -17.5, -15.0, -12.5, -10.0,  -7.5,  -5.0,  -2.5,
+                 0.0,   2.5,   5.0,   7.5,  10.0,  12.5,  15.0,  17.5,  20.0,
+                22.5,  25.0,  27.5,  30.0,  32.5,  35.0,  37.5,  40.0,  42.5,
+                45.0,  47.5,  50.0,  52.5,  55.0,  57.5,  60.0,  62.5,  65.0,
+                67.5,  70.0,  72.5,  75.0,  77.5,  80.0,  82.5,  85.0,  87.5,
+                90.0;
+
+  group: aggregation {
+    dimensions:
+      // Fragment dimensions
+      f_time = 2 ;
+      f_level = 1 ;
+      f_latitude = 2 ;
+      f_longitude = 1 ;
+      // Extra dimensions
+      i = 4 ;
+      j = 2 ;
+      k = 2 ;
+    variables:
+      // Aggregation definition variables
+      int location(i, j) ;
+      string file(f_time, f_level, f_latitude, f_longitude, k) ;
+      string format ;
+      string address(f_time, f_level, f_latitude, f_longitude, k) ;
+      // Fragment variable
+      double temp2(time, latitude, longitude) ;
+        temp2:long_name = "July-December, southern hemisphere" ;
+        temp2:units = "degreesC" ;
+
+    data:
+      location = 6, 6,
+                 1, _,
+                 36, 37,
+                 144, _ ;
+     file = "/remote/January-June_SH.nc", _,
+            _, _,
+            "/local/January-June_NH.nc", "/remote/January-June_NH.nc",
+            "/remote/July-December_NH.nc", _ ;
+     format = "nc" ;
+     address = "temp1", _,
+               "temp2", _,
+               "temp3", "t3",
+               "temp4", _ ;
+     temp2 = 4.5, 3.0, 0.0, -2.6, -5.6, -10.2, _ ;
+  }
+}

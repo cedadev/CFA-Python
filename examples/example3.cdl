@@ -1,0 +1,83 @@
+netcdf {
+  // Example 3
+  // An aggregated data variable whose aggregated data comprises two fragments.
+  // Each fragment is stored in the same dataset and spans half of the aggregated
+  // time dimension and the whole of the latitude and longitude dimensions, but
+  // does not span the size 1 level dimension. As there are no external files,
+  // the file variable contains only missing values, and therefore the format
+  // variable may also be a scalar missing value. The fragments and aggregation
+  // definition variables in this case are stored in a child group called
+  // aggregation. The temp2 fragment has different but equivalent units to the
+  // aggregation variable.
+
+  dimensions:
+    // Aggregated dimensions
+    time = 12 ;
+    level = 1 ;
+    latitude = 73 ;
+    longitude = 144 ;
+   variables:
+    // Data variable
+    double temp ;
+      temp:standard_name = "air_temperature" ;
+      temp:units = "K" ;
+      temp:cell_methods = "time: mean" ;
+      temp:aggregated_dimensions = "time level latitude longitude" ;
+      temp:aggregated_data = "location: /aggregation/location
+                              file: /aggregation/file
+                              format: /aggregation/format
+                              address: /aggregation/address" ;
+    // Coordinate variables
+    double time(time) ;
+      time:standard_name = "time" ;
+      time:units = "days since 2001-01-01" ;
+    double level(level) ;
+      level:standard_name = "height_above_mean_sea_level" ;
+      level:units = "m" ;
+    double latitude(latitude) ;
+      latitude:standard_name = "latitude" ;
+      latitude:units = "degrees_north" ;
+    double longitude(longitude) ;
+      longitude:standard_name = "longitude" ;
+      longitude:units = "degrees_east" ;
+
+  // global attributes:
+    :Conventions = "CF-1.9 CFA-0.6" ;
+  data:
+    temp = _ ;
+    time = 0.0, 31.0, 59.0, 90.0, 120.0, 151.0, 181.0, 212.0, 243.0, 273.0, 304.0, 334.0 ;
+
+  group: aggregation {
+    dimensions:
+      // Fragment dimensions
+      f_time = 2 ;
+      f_level = 1 ;
+      f_latitude = 1 ;
+      f_longitude = 1 ;
+      // Extra dimensions
+      i = 4 ;
+      j = 2 ;
+    variables:
+      // Aggregation definition variables
+      int location(i, j) ;
+      string file(f_time, f_level, f_latitude, f_longitude) ;
+      string format ;
+      string address(f_time, f_level, f_latitude, f_longitude) ;
+      // Fragment variables
+      double temp1(time, latitude, longitude) ;
+        temp1:units = "Kelvin" ;
+      double temp2(time, latitude, longitude) ;
+        temp2:units = "degreesC" ;
+
+    data:
+      location = 6, 6,
+                 1, _,
+                 73, _,
+                 144, _ ;
+     file = _, _ ;
+     format = _ ;
+     address = "temp1", "temp2" ;
+     temp1 = 270.3, 272.5, 274.1, 278.5, 280.3, 283.6, _ ;
+     temp2 = 4.5, 3.0, 0.0, -2.6, -5.6, -10.2, _ ;
+  }
+}
