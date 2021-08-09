@@ -1,4 +1,5 @@
 netcdf {
+
   // Example 6
   // An aggregation data variable for a collection of discrete sampling geometry
   // timeseries features that have been compressed by use of a contiguous ragged

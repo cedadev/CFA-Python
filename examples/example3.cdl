@@ -1,4 +1,5 @@
 netcdf {
+
   // Example 3
   // An aggregated data variable whose aggregated data comprises two fragments.
   // Each fragment is stored in the same dataset and spans half of the aggregated

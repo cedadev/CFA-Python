@@ -1,12 +1,13 @@
 netcdf {
+
   // Example 5
   // An aggregated data variable and an aggregated coordinate variable in the
   // same dataset. There are two external netCDF files, each of which contains a
-  // fragment for each aggregation variable. The aggregation definition variables
-  // for each aggregation variable are stored in different groups
+  // fragment for each aggregation variable. The aggregation definition
+  // variables for each aggregation variable are stored in different groups
   // (aggregation_temp and aggregation_time), but the file terms of the
-  // aggregated_data attributes refer to a variable in the root group that stores
-  // the external file names that apply to both aggregation variables.
+  // aggregated_data attributes refer to a variable in the root group that
+  // stores the external file names that apply to both aggregation variables.
 
   dimensions:
     // Aggregated dimensions

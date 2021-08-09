@@ -1,10 +1,12 @@
 netcdf {
+
   // Example 7
   // An aggregation data variable whose aggregated data represents 32-bit floats
   // packed into 16-bit integers. When created, the aggregated data contains the
-  // 16-bit integer values 0, 5958,..., 65539. These may be subsequently unpacked
-  // to the 32-bit float values 270.0, 270.1, ..., 271.10007, which approximate
-  // the original, pre-packed 32-bit float values 270.0, 270.1, ... 271.1.
+  // 16-bit integer values 0, 5958,..., 65539. These may be subsequently
+  // unpacked to the 32-bit float values 270.0, 270.1, ..., 271.10007, which
+  // approximate the original, pre-packed 32-bit float values 270.0, 270.1, ...
+  // 271.1.
 
   dimensions:
     // Aggregated dimensions
