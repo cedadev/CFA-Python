@@ -31,12 +31,24 @@ class C_AggregatedDimension(Structure):
                 ("cfa_dtype", C_DataType)
             ]
 
+class C_AggregatedData(Structure):
+    _fields_ = [("units", c_char_p)]
+
+class C_AggregationInstructions(Structure):
+    _fields_ = [("location", c_char_p),
+                ("location_scalar", c_bool),
+                ("file", c_char_p),
+                ("format", c_char_p),
+                ("format_scalar", c_bool),
+                ("address", c_char_p)
+            ]
+
 class C_AggregationVariable(Structure):
     _fields_ = [("name", c_char_p),
                 ("cfa_ndim", c_int),
-                ("cfa_dim_idp", pointer(c_int)),
-                ("cfa_frag_dim_idp", pointer(c_int)),
+                ("cfa_dim_idp", c_int * MAX_DIMS),
+                ("cfa_frag_dim_idp", c_int * MAX_DIMS),
                 ("cfa_dtype", C_DataType),
-#                ("cfa_datap", AggregatedData),
-#                ("cfa_instructionsp", AggregationInstructions)
+                # ("cfa_datap", C_AggregatedData),
+                ("cfa_instructionsp", C_AggregationInstructions)
             ]
