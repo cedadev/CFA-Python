@@ -21,9 +21,7 @@ class CFADimension:
         cfa_dim = C_AggregatedDimension()
         cfa_dim_p = pointer(cfa_dim)
         cfa_err = CFAPython.lib.cfa_get_dim(
-            self.__parent_id,
-            self.__cfa_id, 
-            pointer(cfa_dim_p)
+            self.__parent_id, self.__cfa_id, pointer(cfa_dim_p)
         )
         if (cfa_err != 0):
             raise CFAException(cfa_err)

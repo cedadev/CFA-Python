@@ -25,8 +25,7 @@ class CFAGroup:
         cfa_cont = C_AggregationContainer()
         cfa_cont_p = pointer(cfa_cont)
         cfa_err = CFAPython.lib.cfa_get(
-            self._cfa_id, 
-            pointer(cfa_cont_p)
+            self._cfa_id, pointer(cfa_cont_p)
         )
         if (cfa_err != 0):
             raise CFAException(cfa_err)
@@ -78,12 +77,30 @@ class CFAGroup:
                 return dim
         raise CFAException("Dimension {} not found".format(dimname))
 
+    def getDimName(self, dimnum: int) -> str:
+        """Get the name of a dimension in this container / group"""
+        dims = self.getDims()
+        if dimnum >= len(dims):
+            raise CFAException(
+                "Dimension number {} is out of range".format(dimnum)
+            )
+        return dims[dimnum].name
+
     def getVars(self) -> list[object]:
         """Get the list of CFAVariables in this container (CFAGroup)"""
         vars = []
         for v in self._var_ids:
             vars.append(CFAVariable(self._cfa_id, v))
         return vars
+
+    def getVarName(self, varnum: int) -> str:
+        """Get the name of a variable in this container / group"""
+        vars = self.getVars()
+        if varnum >= len(vars):
+            raise CFAException(
+                "Variable number {} is out of range".format(varnum)
+            )
+        return vars[varnum].name
 
     def getVar(self, varname) -> object:
         """Get a single variable, matching the name"""
@@ -107,6 +124,15 @@ class CFAGroup:
             if grp.name == grpname:
                 return grp
         raise CFAException("Group {} not found".format(grpname))
+
+    def getGrpName(self, grpnum: int) -> str:
+        """Get the name of a variable in this container / group"""
+        grps = self.getGrps()
+        if grpnum >= len(grps):
+            raise CFAException(
+                "Group number {} is out of range".format(grpnum)
+            )
+        return grps[grpnum].name
 
     @property
     def ngrps(self) -> int:

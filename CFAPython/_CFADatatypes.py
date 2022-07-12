@@ -49,6 +49,23 @@ class C_AggregationVariable(Structure):
                 ("cfa_dim_idp", c_int * MAX_DIMS),
                 ("cfa_frag_dim_idp", c_int * MAX_DIMS),
                 ("cfa_dtype", C_DataType),
-                # ("cfa_datap", C_AggregatedData),
+                ("cfa_datap", C_AggregatedData),
                 ("cfa_instructionsp", C_AggregationInstructions)
+            ]
+
+class C_FragmentDimension(Structure):
+    _fields_ = [("name", c_char_p),
+                ("length", c_int),
+                ("cfa_dim_id", c_int)
+            ]
+
+class C_Fragment(Structure):
+    _fields_ = [("location", c_void_p),
+                ("index", c_void_p),
+                ("file", c_char_p),
+                ("format", c_char_p),
+                ("address", c_char_p),
+                ("units", c_char_p),
+                ("cfa_dtype", C_DataType),
+                ("linear_index", c_int)
             ]
