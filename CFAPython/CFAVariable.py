@@ -5,6 +5,7 @@ from CFAPython._CFADatatypes import (C_AggregationVariable, C_FragmentDimension,
                                      C_Fragment)
 from CFAPython.CFAExceptions import CFAException
 from CFAPython.CFADimension import CFADimension
+from CFAPython.CFAFragment import CFAFragment
 
 from ctypes import c_int, c_size_t, pointer, byref
 
@@ -128,7 +129,7 @@ class CFAVariable:
             self.__parent_id, self.__cfa_id, frag_loc_p, data_loc_p,
             pointer(frag_p)
         )
-        print(dir(frag_p[0]))
+        
         if (cfa_err != 0):
             raise CFAException(cfa_err)        
-        return frag_p[0]
+        return CFAFragment(frag_p[0])

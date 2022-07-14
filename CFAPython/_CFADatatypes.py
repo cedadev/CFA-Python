@@ -1,5 +1,5 @@
 ### ctypes declarations of typthe structs used in the CFA-C library
-from ctypes import *
+from ctypes import Structure, c_int, c_char_p, c_size_t, c_bool, c_void_p
 # These values MUST match the #defines in the cfa.h header file
 MAX_VARS = 256
 MAX_DIMS = 256
