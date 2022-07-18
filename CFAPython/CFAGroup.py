@@ -1,5 +1,6 @@
 
 from __future__ import annotations
+from typing import Iterable
 
 import CFAPython
 from CFAPython._CFADatatypes import C_AggregationContainer
@@ -7,7 +8,7 @@ from CFAPython.CFAExceptions import CFAException
 from CFAPython.CFADimension import CFADimension
 from CFAPython.CFAVariable import CFAVariable
 
-from ctypes import c_int, pointer
+from ctypes import c_int, c_char_p, pointer, byref, sizeof
 
 class CFAGroup:
     def __init__(self, parent_id: int = -1, id: int = -1):
@@ -61,7 +62,18 @@ class CFAGroup:
             grpids.append(container.cfa_contids[g])
         return grpids
 
-    
+    def addDim(self, dimname: str, dtype: CFAPython.CFADataType=4, 
+               length: int=1):
+        """Add a dimension"""
+        cfa_dim_id = c_int(-1)
+        cname = c_char_p(dimname.encode())
+        cfa_err = CFAPython.lib.cfa_def_dim(
+            self._cfa_id, cname, length, dtype, pointer(cfa_dim_id)
+        )
+        if (cfa_err != 0):
+            raise CFAException(cfa_err)
+        return CFADimension(self._cfa_id, cfa_dim_id)
+
     def getDims(self) -> list[object]:
         """Get the list of CFADimensions in this container (CFAGroup)"""
         dims = []
@@ -69,7 +81,7 @@ class CFAGroup:
             dims.append(CFADimension(self._cfa_id, d))
         return dims
 
-    def getDim(self, dimname) -> object:
+    def getDim(self, dimname: str) -> object:
         """Get a single dimension, matching the name"""
         dims = self.getDims()
         for dim in dims:
@@ -85,6 +97,40 @@ class CFAGroup:
                 "Dimension number {} is out of range".format(dimnum)
             )
         return dims[dimnum].name
+
+    def addVar(self, varname: str, dtype: str="int", 
+               dimnames: Iterable[str]=[]):
+        """Add a variable to the group"""
+        cfa_var_id = c_int(-1)
+        cname = c_char_p(varname.encode())
+        cfa_err = CFAPython.lib.cfa_def_var(
+            self._cfa_id, cname, dtype, pointer(cfa_var_id)
+        )
+        if (cfa_err != 0):
+            raise CFAException(cfa_err)
+        
+        # the variable has been created in the CFA representation, now define
+        # the dimensions
+        # dimension ids returned in iteration - get the dimension ids from the
+        # dimnames
+        cfa_dim_ids = (c_int * len(dimnames))()
+        d = 0
+        for dim in dimnames:
+            cdimname = c_char_p(dim.encode())
+            cfa_err = CFAPython.lib.cfa_inq_dim_id(
+                self._cfa_id, cdimname, byref(cfa_dim_ids, sizeof(c_int)*d)
+            )
+            if (cfa_err != 0):
+                raise CFAException(cfa_err)
+            d += 1
+
+        # add the AggregatedDimension names to the AggregationVariable 
+        cfa_err = CFAPython.lib.cfa_var_def_dims(
+            self._cfa_id, cfa_var_id, len(dimnames), cfa_dim_ids
+        )
+        if (cfa_err != 0):
+            raise CFAException(cfa_err)
+        return CFAVariable(self._cfa_id, cfa_var_id)
 
     def getVars(self) -> list[object]:
         """Get the list of CFAVariables in this container (CFAGroup)"""
@@ -102,13 +148,24 @@ class CFAGroup:
             )
         return vars[varnum].name
 
-    def getVar(self, varname) -> object:
+    def getVar(self, varname: str) -> object:
         """Get a single variable, matching the name"""
         vars = self.getVars()
         for var in vars:
             if var.name == varname:
                 return var
         raise CFAException("Variable {} not found".format(varname))
+
+    def addGrp(self, grpname: str) -> object:
+        """Create a group in this group and return the group"""
+        cfa_grp_id = c_int(-1)
+        cname = c_char_p(grpname.encode())
+        cfa_err = CFAPython.lib.cfa_def_cont(
+            self._cfa_id, cname, pointer(cfa_grp_id)
+        )
+        if (cfa_err != 0):
+            raise CFAException(cfa_err)
+        return CFAGroup(self._cfa_id, cfa_grp_id)
 
     def getGrps(self) -> list[object]:
         """Get the list of CFAGroups in this container"""
@@ -117,7 +174,7 @@ class CFAGroup:
             grps.append(CFAGroup(self._cfa_id, g))
         return grps
 
-    def getGrp(self, grpname) -> object:
+    def getGrp(self, grpname: str) -> object:
         """Get a single group by name"""
         grps = self.getGrps()
         for grp in grps:
