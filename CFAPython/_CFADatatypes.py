@@ -1,5 +1,6 @@
 ### ctypes declarations of typthe structs used in the CFA-C library
-from ctypes import Structure, c_int, c_char_p, c_size_t, c_bool, c_void_p
+from ctypes import (Structure, c_int, c_char_p, c_size_t, c_bool, 
+                    c_void_p, POINTER)
 # These values MUST match the #defines in the cfa.h header file
 MAX_VARS = 256
 MAX_DIMS = 256
@@ -60,8 +61,8 @@ class C_FragmentDimension(Structure):
             ]
 
 class C_Fragment(Structure):
-    _fields_ = [("location", c_void_p),
-                ("index", c_void_p),
+    _fields_ = [("location", POINTER(c_size_t)),
+                ("index", POINTER(c_size_t)),
                 ("file", c_char_p),
                 ("format", c_char_p),
                 ("address", c_char_p),

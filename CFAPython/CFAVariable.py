@@ -7,7 +7,7 @@ from CFAPython.CFAExceptions import CFAException
 from CFAPython.CFADimension import CFADimension
 from CFAPython.CFAFragment import CFAFragment
 
-from ctypes import c_int, c_size_t, pointer, byref
+from ctypes import c_size_t, pointer, c_char_p, c_int
 
 class CFAVariable:
     def __init__(self, parent_id: int = -1, id: int = -1):
@@ -46,6 +46,124 @@ class CFAVariable:
         for d in range(0, self.ndims):
             dimids.append(variable.cfa_dim_idp[d])
         return dimids
+
+    def setAggInstr(self, 
+                    location = "", location_scalar = False,
+                    file = "", 
+                    format = "", format_scalar = False,
+                    address = ""):
+        """Set the aggration instructions - that is the location, file, format,
+        and address fields in the AggregationInstructions associated with this
+        variable."""
+        if len(location) > 0:
+            cinstruction = c_char_p("location".encode())
+            cvalue = c_char_p(location.encode())
+            cfa_err = CFAPython.lib.cfa_var_def_agg_instr(
+                self.__parent_id, self.__cfa_id,
+                cinstruction, cvalue, 
+                location_scalar
+            )
+            if (cfa_err != 0):
+                raise CFAException(cfa_err)
+
+        if len(file) > 0:
+            cinstruction = c_char_p("file".encode())
+            cvalue = c_char_p(file.encode())
+            cfa_err = CFAPython.lib.cfa_var_def_agg_instr(
+                self.__parent_id, self.__cfa_id,
+                cinstruction, cvalue,
+                False
+            )
+            if (cfa_err != 0):
+                raise CFAException(cfa_err)
+
+        if len(format) > 0:
+            cinstruction = c_char_p("format".encode())
+            cvalue = c_char_p(format.encode())
+            cfa_err = CFAPython.lib.cfa_var_def_agg_instr(
+                self.__parent_id, self.__cfa_id,
+                cinstruction, cvalue,
+                format_scalar
+            )
+            if (cfa_err != 0):
+                raise CFAException(cfa_err)
+
+        if len(address) > 0:
+            cinstruction = c_char_p("address".encode())
+            cvalue = c_char_p(address.encode())
+            cfa_err = CFAPython.lib.cfa_var_def_agg_instr(
+                self.__parent_id, self.__cfa_id,
+                cinstruction, cvalue,
+                False
+            )
+            if (cfa_err != 0):
+                raise CFAException(cfa_err)
+
+    def setFragNum(self, frag_def: list[int]):
+        """Set the Fragment definitions, i.e. how many times each dimension
+        is subdivided."""
+        # create the fragment location as a pointer to a size_t array
+        if len(frag_def) != 0:
+            frag_def_c = (c_int * len(frag_def))(0)
+            for d in range(0, len(frag_def)):
+                frag_def_c[d] = frag_def[d]
+        else:
+            frag_def_c = None
+        cfa_err = CFAPython.lib.cfa_var_def_frag_num(
+            self.__parent_id, self.__cfa_id, frag_def_c
+        )
+        if (cfa_err != 0):
+            raise CFAException(cfa_err)
+
+    def setFrag(self, frag_loc: list[int] = [], data_loc: list[int] = [],
+                file: str = "", format: str = "", 
+                address: str = "", units: str = ""):
+        """Set the data for a fragment"""
+        # create the fragment location as a pointer to a size_t array
+        if len(frag_loc) != 0:
+            frag_loc_c = (c_size_t * len(frag_loc))(0)
+            for d in range(0, len(frag_loc)):
+                frag_loc_c[d] = frag_loc[d]
+        else:
+            frag_loc_c = None
+
+        # create the data location as a pointer to a size_t array
+        if len(data_loc) != 0:
+            data_loc_c = (c_size_t * len(data_loc))(c_size_t(0))
+            for d in range(0, len(data_loc)):
+                data_loc_c[d] = data_loc[d]
+        else:
+            data_loc_c = None
+
+        # create all the details as C strings
+        if len(file) > 0:
+            cfile = c_char_p(file.encode())
+        else:
+            cfile = None
+        if len(address) > 0:
+            caddress = c_char_p(address.encode())
+        else:
+            caddress = None
+        if len(format) > 0:
+            cformat = c_char_p(format.encode())
+        else:
+            cformat = None
+        if len(units) > 0:
+            cunits = c_char_p(units.encode())
+        else:
+            cunits = None
+
+        cfa_err = CFAPython.lib.cfa_var_put1_frag(
+                self.__parent_id, self.__cfa_id,
+                frag_loc_c,
+                data_loc_c,
+                cfile,
+                cformat,
+                caddress,
+                cunits
+        )
+        if cfa_err != 0:
+            raise CFAException(cfa_err)
 
     def getDims(self) -> list[object]:
         """Get the list of CFADimensions defined for this variable"""
@@ -109,27 +227,25 @@ class CFAVariable:
 
         # create the fragment location as a pointer to a size_t array
         if len(frag_loc) != 0:
-            frag_loc_c = (c_size_t * len(frag_loc))()
+            frag_loc_c = (c_size_t * len(frag_loc))(0)
             for d in range(0, len(frag_loc)):
                 frag_loc_c[d] = frag_loc[d]
-            frag_loc_p = pointer(frag_loc_c)
         else:
-            frag_loc_p = None
+            frag_loc_c = None
 
         # create the data location as a pointer to a size_t array
         if len(data_loc) != 0:
-            data_loc_c = (c_size_t(0) * len(data_loc))()
+            data_loc_c = (c_size_t * len(data_loc))(c_size_t(0))
             for d in range(0, len(data_loc)):
                 data_loc_c[d] = data_loc[d]
-            data_loc_p = pointer(data_loc_c)
         else:
-            data_loc_p = None
+            data_loc_c = None
 
         cfa_err = CFAPython.lib.cfa_var_get1_frag(
-            self.__parent_id, self.__cfa_id, frag_loc_p, data_loc_p,
+            self.__parent_id, self.__cfa_id, frag_loc_c, data_loc_c,
             pointer(frag_p)
         )
         
         if (cfa_err != 0):
             raise CFAException(cfa_err)        
-        return CFAFragment(frag_p[0])
+        return CFAFragment(frag_p[0], self.ndims)
