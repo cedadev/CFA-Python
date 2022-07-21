@@ -1,15 +1,15 @@
-"""Program to recreate example 1 from the CFA documentation"""
+"""Program to recreate example 2 from the CFA documentation"""
 from CFAPython.CFADataset import CFADataset
 from CFAPython import CFAFileFormat
 from CFAPython import CFADataType
 
-example1_path = "examples/test/example1.nc"
+example2_path = "examples/test/example2.nc"
 
-def example1_save():
-    print("Example 1 save")
+def example2_save():
+    print("Example 2 save")
 
     # create the Dataset (AggregationContainer)
-    cfa = CFADataset(example1_path, CFAFileFormat.CFANetCDF, "w")
+    cfa = CFADataset(example2_path, CFAFileFormat.CFANetCDF, "w")
 
     # add the CFA dimensions (AggregatedDimensions)
     cfa.addDim("time", CFADataType.CFADouble, 12)
@@ -33,13 +33,17 @@ def example1_save():
     var.setFrag(frag_loc=[0,0,0,0],
                 file="January-June.nc", format="nc", address="temp", units="")
     var.setFrag(frag_loc=[1,0,0,0],
-                file="July-December.nc", format="nc", address="temp", units="")
+                file=None, format="nc", address="temp2", units="")
+
+    # note that the temp2 local variable has not been created as that would
+    # require interfacing with the Python netCDF-4 routines, which I have yet
+    # to write / figure out how to do
     print("----------------")
 
-def example1_load():
-    print("Example 1 load")
+def example2_load():
+    print("Example 2 load")
     # load in the CFA Dataset
-    cfa = CFADataset(example1_path, CFAFileFormat.CFANetCDF, "r")
+    cfa = CFADataset(example2_path, CFAFileFormat.CFANetCDF, "r")
 
     # get and print the CFA AggregatedDimensions
     time = cfa.getDim("time")
@@ -89,5 +93,5 @@ def example1_load():
     print("Dtype: ", frag.cfa_dtype)
 
 if __name__ == "__main__":
-    example1_save()
-    example1_load()
+    example2_save()
+    example2_load()

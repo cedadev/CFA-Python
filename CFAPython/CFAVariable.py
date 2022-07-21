@@ -120,7 +120,7 @@ class CFAVariable:
                 address: str = "", units: str = ""):
         """Set the data for a fragment"""
         # create the fragment location as a pointer to a size_t array
-        if len(frag_loc) != 0:
+        if frag_loc and len(frag_loc) != 0:
             frag_loc_c = (c_size_t * len(frag_loc))(0)
             for d in range(0, len(frag_loc)):
                 frag_loc_c[d] = frag_loc[d]
@@ -128,7 +128,7 @@ class CFAVariable:
             frag_loc_c = None
 
         # create the data location as a pointer to a size_t array
-        if len(data_loc) != 0:
+        if data_loc and len(data_loc) != 0:
             data_loc_c = (c_size_t * len(data_loc))(c_size_t(0))
             for d in range(0, len(data_loc)):
                 data_loc_c[d] = data_loc[d]
@@ -136,19 +136,19 @@ class CFAVariable:
             data_loc_c = None
 
         # create all the details as C strings
-        if len(file) > 0:
+        if file and len(file) > 0:
             cfile = c_char_p(file.encode())
         else:
             cfile = None
-        if len(address) > 0:
+        if address and len(address) > 0:
             caddress = c_char_p(address.encode())
         else:
             caddress = None
-        if len(format) > 0:
+        if format and len(format) > 0:
             cformat = c_char_p(format.encode())
         else:
             cformat = None
-        if len(units) > 0:
+        if units and len(units) > 0:
             cunits = c_char_p(units.encode())
         else:
             cunits = None
