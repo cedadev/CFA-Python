@@ -3,7 +3,11 @@ from CFAPython.CFADataset import CFADataset
 from CFAPython import CFAFileFormat
 from CFAPython import CFADataType
 
-example2_path = "examples/test/example2.nc"
+import os.path
+
+# set the example path to be relative to this file
+this_path = os.path.dirname(__file__)
+example2_path = os.path.join(this_path, "../../examples/test/example2.nc")
 
 def example2_save():
     print("Example 2 save")

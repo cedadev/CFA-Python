@@ -1,7 +1,12 @@
 import ctypes
+from importlib.machinery import EXTENSION_SUFFIXES
+import os.path
+
 from enum import IntEnum
+
 # load the CFA-C library
-libpath = "../CFA-C/lib/libcfa.so"
+this_path = os.path.dirname(__file__)
+libpath = os.path.join(this_path, "cfa" + EXTENSION_SUFFIXES[0])
 lib = ctypes.CDLL(libpath)
 
 # define the file format enum
