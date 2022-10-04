@@ -56,7 +56,7 @@ def build_cfa_extension():
                               os.path.join(src_dir, 'parsers')],
                 extra_compile_args=["-D_DEBUG"],
                 libraries=['netcdf'],
-                languge='c',
+                language='c',
                 sources=cfa_sources)
     return [cfa_c]
 
