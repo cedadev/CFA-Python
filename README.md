@@ -29,5 +29,4 @@ no longer required to compile the CFA-C library themselves.
 
 1. Run the example
 
-        cd CFA-Python
         python test/examples/example1.py
