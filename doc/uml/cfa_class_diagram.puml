@@ -1,52 +1,99 @@
-@startuml
+@startuml cfa_class_diagram
+left to right direction
 
-class DataType {
-    +numpy.dtype datatype
+class CFADataset #lightskyblue{
+    +int id
+    +str path
+    +str format
 }
 
-class Fragment {
-    +int location
-    +string file
-    +string format
-    +string address
-    +string units
+object AggregationContainer #lightskyblue-white{
 }
 
-class AggregatedData {
-    +string location_var
-    +string file_var
-    +string format_var
-    +string address_var
-    +string units
+class CFAGroup #lightskyblue{
+    +int ngrps
+    +int nvars
+    +int ndims
+    +str name
+    -int cfa_id
+    -int parent_id
+    +CFADimension addDim()
+    +list[CFADimension] getDims()
+    +CFADimension getDim()
+    +str getDimName()
+    +CFAVariable addVar()
+    +list[CFAVariables] getVars()
+    +str getVarName()
+    +CFAVariable getVar()
+    +CFAGroup addGrp()
+    +list[CFAGroup] getGrps()
+    +CFAGroup getGrp()
+    +str getGrpName()
 }
 
-abstract CFADimension {
-    +string dimension_name
-    +int size
+class CFADimension #hotpink{
+    -int parent_id
+    -int cfa_id
+    +str name
+    +int len
+    +DataType type
 }
 
-class AggregatedDimension {
+object AggregatedDimension #hotpink-white{
 }
 
-class ExtraDimension {
+class CFAVariable #coral{
+    +str name
+    +int ndims
+    -int cfa_id
+    -int parent_id
+    +None setAggInstr()
+    +None setFragNum()
+    +None setFrag()
+    +list[CFADimensions] getDims()
+    +CFADimension getDim()
+    +str getDimName()
+    +list[int] getFragDef()
+    +int getFragDimLen()
+    +CFAFragment getFrag()
 }
 
-class FragmentDimension {
+object AggregationVariable #coral-white{
 }
 
-class AggregationVariable {
-    +string name
+class CFAFragment #cyan{
+    +list[int] location
+    +list[int] index
+    +str file
+    +str format
+    +str address
+    +str units
+    +DataType cfa_dtype
 }
 
-AggregationVariable "1" o-- "0..*" AggregatedDimension
-AggregationVariable "1" o-- "1" AggregatedData
-AggregatedData "1" o-- "1..*" Fragment
-AggregatedData "1" o-- "0..*" FragmentDimension
-AggregatedDimension "1" -- "1" FragmentDimension : ordered
-AggregatedData -- DataType
-Fragment -- DataType
-CFADimension <|-- AggregatedDimension
-CFADimension <|-- ExtraDimension
-CFADimension <|-- FragmentDimension
+object Fragment #cyan-white{
 
+}
+
+class CFAException{
+
+}
+
+CFADataset ---|> CFAGroup
+CFADimension --o CFAGroup
+CFAVariable --o CFAGroup
+CFAFragment --o CFAVariable
+
+CFAException --* CFAGroup
+CFAException --* CFAVariable
+CFAException --* CFADimension
+CFAException --* CFADataset
+CFAException --* CFAFragment
+
+CFADataset --* AggregationContainer
+CFAGroup --* AggregationContainer
+CFADimension --* AggregatedDimension
+CFAVariable --* AggregationVariable
+
+CFAFragment --* Fragment
 @enduml

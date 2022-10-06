@@ -48,10 +48,10 @@ class CFAVariable:
         return dimids
 
     def setAggInstr(self, 
-                    location = "", location_scalar = False,
-                    file = "", 
-                    format = "", format_scalar = False,
-                    address = ""):
+                    location: str = "", location_scalar: bool = False,
+                    file: str = "", 
+                    format: str = "", format_scalar: bool = False,
+                    address: str  = "") -> None:
         """Set the aggration instructions - that is the location, file, format,
         and address fields in the AggregationInstructions associated with this
         variable."""
@@ -99,7 +99,7 @@ class CFAVariable:
             if (cfa_err != 0):
                 raise CFAException(cfa_err)
 
-    def setFragNum(self, frag_def: list[int]):
+    def setFragNum(self, frag_def: list[int]) -> None:
         """Set the Fragment definitions, i.e. how many times each dimension
         is subdivided."""
         # create the fragment location as a pointer to a size_t array
@@ -115,9 +115,13 @@ class CFAVariable:
         if (cfa_err != 0):
             raise CFAException(cfa_err)
 
-    def setFrag(self, frag_loc: list[int] = [], data_loc: list[int] = [],
-                file: str = "", format: str = "", 
-                address: str = "", units: str = ""):
+    def setFrag(self, 
+                frag_loc: list[int] = [], 
+                data_loc: list[int] = [],
+                file: str = "", 
+                format: str = "", 
+                address: str = "", 
+                units: str = "") -> None:
         """Set the data for a fragment"""
         # create the fragment location as a pointer to a size_t array
         if frag_loc and len(frag_loc) != 0:
@@ -218,7 +222,8 @@ class CFAVariable:
                 return frag_dim_lens[d]
         raise CFAException("Dimension {} not found".format(dimname))
 
-    def getFrag(self, frag_loc: list[int] = [], data_loc: list[int] = []):
+    def getFrag(self, frag_loc: list[int] = [], 
+                data_loc: list[int] = []) -> object:
         """Get a fragment in a CFAVariable, either from a Fragment Location,
         or a Data Location."""
         # create the return fragment

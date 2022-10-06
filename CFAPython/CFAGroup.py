@@ -63,7 +63,7 @@ class CFAGroup:
         return grpids
 
     def addDim(self, dimname: str, dtype: CFAPython.CFADataType=4, 
-               length: int=1):
+               length: int=1) -> object:
         """Add a dimension"""
         cfa_dim_id = c_int(-1)
         cname = c_char_p(dimname.encode())
@@ -99,7 +99,7 @@ class CFAGroup:
         return dims[dimnum].name
 
     def addVar(self, varname: str, dtype: str="int", 
-               dimnames: Iterable[str]=[]):
+               dimnames: Iterable[str]=[]) -> object:
         """Add a variable to the group"""
         cfa_var_id = c_int(-1)
         cname = c_char_p(varname.encode())

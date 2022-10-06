@@ -6,8 +6,7 @@ from CFAPython.CFAExceptions import CFAException
 from ctypes import *
 
 class CFADataset(CFAGroup):
-    def __init__(self, path: str, format: CFAPython.CFAFileFormat,
-                 mode: str) -> object:
+    def __init__(self, path: str, format: CFAPython.CFAFileFormat, mode: str):
         """Create a CFA object and either read it in from a CFA-netCDF file, or 
         create the file to write to.
         Args:

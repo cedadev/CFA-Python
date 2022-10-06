@@ -1,42 +1,33 @@
 CFA Classes
 ===========
 
-Reference implementation of CFA (Climate Forecast Aggregation) Conventions in Python 3 (3.8+).
+Reference implementation of CFA (Climate Forecast Aggregation) Conventions in Python 3 (3.9+).
 
 Installation
 ------------
-(These are temporary installation instructions until I write a setup.py that
-will take care of installing the CFA-C library)
-CFA-Python requires a compiled version of the CFA-C library to be installed in
-the path: 
 
-    ../CFA-C/lib/libcfa.so
+There is now a `setup.py` which will compile and install the required CFA-C 
+library.  This superceeds any previous installation instructions.  The user is
+no longer required to compile the CFA-C library themselves.
 
-This path can be changed in the file:
+1. Create a virtual environment (can name it anything)
 
-    CFAPython/__init__/py
+        python3 -m venv CFA-python-venv
 
-Follow these steps to install:
+1. Activate the virtual environment:
 
-1. Make a common directory
-
-        mkdir CFA
-
-1. Clone the `CFA-C` repository:
-
-        git clone https://github.com/cedadev/CFA-C.git CFA/CFA-C
-
-1. Compile the `CFA-C` shared library
-
-        cd CFA/CFA-C
-        make all
-        cd ../../
+        source CFA-python-venv/bin/activate
 
 1. Clone the `CFA-Python` repository:
 
-        git clone https://github.com/cedadev/CFA-Python CFA/CFA-Python
+        git clone https://github.com/cedadev/CFA-Python.git
+
+1. Go into the clone and install
+
+        cd CFA-Python
+        pip install ./
 
 1. Run the example
 
-        cd CFA/CFA-Python
+        cd CFA-Python
         python test/examples/example1.py

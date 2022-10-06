@@ -1,6 +1,6 @@
 BSD 2-Clause License
 
-Copyright (c) 2021, Centre of Environmental Data Analysis Developers,
+Copyright (c) 2021-2022, Centre of Environmental Data Analysis Developers,
 Scientific and Technical Facilities Council (STFC),
 UK Research and Innovation (UKRI).
 All rights reserved.
