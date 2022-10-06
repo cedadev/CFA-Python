@@ -12,6 +12,11 @@ example2_path = os.path.join(this_path, "../../examples/test/example2.nc")
 def example2_save():
     print("Example 2 save")
 
+    # check the target directory exists
+    dir = os.path.dirname(example2_path)
+    if not (os.path.exists(dir)):
+        os.mkdir(dir)
+
     # create the Dataset (AggregationContainer)
     cfa = CFADataset(example2_path, CFAFileFormat.CFANetCDF, "w")
 

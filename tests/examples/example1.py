@@ -3,7 +3,7 @@ from CFAPython.CFADataset import CFADataset
 from CFAPython import CFAFileFormat
 from CFAPython import CFADataType
 
-import os.path
+import os
 
 # set the example path to be relative to this file
 this_path = os.path.dirname(__file__)
@@ -11,6 +11,11 @@ example1_path = os.path.join(this_path, "../../examples/test/example1.nc")
 
 def example1_save():
     print("Example 1 save")
+
+    # check the target directory exists
+    dir = os.path.dirname(example1_path)
+    if not (os.path.exists(dir)):
+        os.mkdir(dir)
 
     # create the Dataset (AggregationContainer)
     cfa = CFADataset(example1_path, CFAFileFormat.CFANetCDF, "w")
