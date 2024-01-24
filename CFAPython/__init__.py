@@ -1,6 +1,7 @@
 import ctypes
 from importlib.machinery import EXTENSION_SUFFIXES
 import os.path
+import netCDF4
 
 from enum import IntEnum
 
@@ -18,7 +19,7 @@ class CFAFileFormat(IntEnum):
     CFAUnknown = -1
 
 # define the datatype enum
-class CFADataType(IntEnum):
+class CFAType(IntEnum):
     # these values must match those in CFA.h
     CFANat    = 0,              # /**< Not A Type */
     CFAByte   = 1,              # /**< signed 1 byte integer */
@@ -32,4 +33,5 @@ class CFADataType(IntEnum):
     CFAUShort = 8,              # /**< unsigned 2-byte int */
     CFAUInt   = 9,              # /**< unsigned 4-byte int */
     CFAInt64  = 10,             # /**< signed 8-byte int */
-    CFAUInt64 = 11              # /**< unsigned 8-byte int */
+    CFAUInt64 = 11,             # /**< unsigned 8-byte int */
+    CFAString = 12              # /**< really a char* */

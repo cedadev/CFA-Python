@@ -25,7 +25,7 @@ class CFADimension:
         )
         if (cfa_err != 0):
             raise CFAException(cfa_err)
-        return cfa_dim_p[0]
+        return cfa_dim_p.contents
 
     @property
     def name(self) -> str:
@@ -40,4 +40,4 @@ class CFADimension:
     @property
     def type(self) -> int:
         """Return the datatype of the dimension"""
-        return CFAPython.CFADataType(self._dimension.cfa_dtype.type)
+        return CFAPython.CFAType(self._dimension.cfa_dtype.type)

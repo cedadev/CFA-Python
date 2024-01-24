@@ -4,14 +4,17 @@ import tempfile
 import urllib.request
 import zipfile
 from io import BytesIO
-import time
+import shutil
+import site
+import sys
 
 MAJOR_VERSION = '0'
-MINOR_VERSION = '0'
+MINOR_VERSION = '6'
 
-CFA_C_VERSION_TAG = "0.0.0"
+CFA_C_VERSION_TAG = "0.0.6"
 
 CFA_C_URL = "https://github.com/cedadev/CFA-C/archive/refs/tags/"
+CFA_C_LOCAL = "/Users/neil.massey/Coding/CFA-C"
 
 # create a temporary directory to store the downloaded CFA-C source code
 # it has to be global so that the tmp_dir object doesn't go out of scope and 
@@ -29,10 +32,31 @@ def fetch_cfa_c_source():
     # unzip the files to the temporary directory
     cfa_zip.extractall(tmp_dir.name)
 
+def fetch_cfa_c_source_local():
+    # Local version of fetching the source to enable faster development
+    shutil.copytree(CFA_C_LOCAL, 
+                    os.path.join(tmp_dir.name, "CFA-C-"+CFA_C_VERSION_TAG))
+
+def get_netcdf_library_path_mac():
+    lib_dirs = []
+    for s in site.getsitepackages():
+        lib_dir = os.path.join(s, "netCDF4/.dylibs")
+        lib_dirs.append(lib_dir)
+    return lib_dirs
+
+def get_netcdf_library_path():
+    # this is probably path specific, this works for Mac
+    if sys.platform == 'darwin':
+        return get_netcdf_library_path_mac()
+    else:
+        raise NotImplementedError("Platform is currently not supported")
 
 def build_cfa_extension():
-    # fetch the CFA-C source code from GitHub
-    fetch_cfa_c_source()
+    # fetch the CFA-C source code from GitHub or local
+    if True:
+        fetch_cfa_c_source_local()
+    else:
+        fetch_cfa_c_source()
     # build the sources list for the CFA-C library
     sources = [ "cfa.c",
                 "cfa_var.c",
@@ -47,7 +71,8 @@ def build_cfa_extension():
     src_dir = os.path.join(tmp_dir.name, "CFA-C-"+CFA_C_VERSION_TAG+"/src")
     for s in sources:
         cfa_sources.append(os.path.abspath(os.path.join(src_dir, s)))
-
+ 
+    lib_dirs = get_netcdf_library_path()
     # create the Extension class to pass to setup
     cfa_c = Extension(name='CFAPython.cfa',
                 define_macros=[('MAJOR_VERSION', MAJOR_VERSION),
@@ -55,11 +80,11 @@ def build_cfa_extension():
                 include_dirs=[src_dir,
                               os.path.join(src_dir, 'parsers')],
                 extra_compile_args=["-D_DEBUG"],
-                libraries=['netcdf'],
+                library_dirs=lib_dirs,
+                libraries=["netcdf.19"],
                 language='c',
                 sources=cfa_sources)
     return [cfa_c]
-
 
 setup(name='CFAPython',
     version=MAJOR_VERSION + '.' + MINOR_VERSION,

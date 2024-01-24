@@ -1,7 +1,7 @@
 """Program to recreate example 2 from the CFA documentation"""
 from CFAPython.CFADataset import CFADataset
 from CFAPython import CFAFileFormat
-from CFAPython import CFADataType
+from CFAPython import CFAType
 
 import os.path
 
@@ -21,14 +21,14 @@ def example2_save():
     cfa = CFADataset(example2_path, CFAFileFormat.CFANetCDF, "w")
 
     # add the CFA dimensions (AggregatedDimensions)
-    cfa.addDim("time", CFADataType.CFADouble, 12)
-    cfa.addDim("level", CFADataType.CFADouble, 1)
-    cfa.addDim("latitude", CFADataType.CFADouble, 73)
-    cfa.addDim("longitude", CFADataType.CFADouble, 144)
+    cfa.addDim("time", CFAType.CFADouble, 12)
+    cfa.addDim("level", CFAType.CFADouble, 1)
+    cfa.addDim("latitude", CFAType.CFADouble, 73)
+    cfa.addDim("longitude", CFAType.CFADouble, 144)
 
     # add the CFA variable (AggregationVariable), with the AggregatedDimensions
     # as above
-    var = cfa.addVar("temp", CFADataType.CFADouble,
+    var = cfa.addVar("temp", CFAType.CFAShort,
                      ("time", "level", "latitude", "longitude"))
 
     # set the AggregationInstructions

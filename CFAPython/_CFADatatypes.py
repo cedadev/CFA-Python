@@ -5,6 +5,8 @@ from ctypes import (Structure, c_int, c_char_p, c_size_t, c_bool,
 MAX_VARS = 256
 MAX_DIMS = 256
 MAX_CONTS = 256
+MAX_AGG_INSTR = 32
+
 
 class C_AggregationContainer(Structure):
     _fields_ = [("cfa_varids", c_int * MAX_VARS),
@@ -35,13 +37,11 @@ class C_AggregatedDimension(Structure):
 class C_AggregatedData(Structure):
     _fields_ = [("units", c_char_p)]
 
-class C_AggregationInstructions(Structure):
-    _fields_ = [("location", c_char_p),
-                ("location_scalar", c_bool),
-                ("file", c_char_p),
-                ("format", c_char_p),
-                ("format_scalar", c_bool),
-                ("address", c_char_p)
+class C_AggregationInstruction(Structure):
+    _fields_ = [("term", c_char_p),
+                ("value", c_char_p),
+                ("scalar", c_bool),
+                ("type", C_DataType)
             ]
 
 class C_AggregationVariable(Structure):
@@ -51,22 +51,12 @@ class C_AggregationVariable(Structure):
                 ("cfa_frag_dim_idp", c_int * MAX_DIMS),
                 ("cfa_dtype", C_DataType),
                 ("cfa_datap", C_AggregatedData),
-                ("cfa_instructionsp", C_AggregationInstructions)
+                ("n_instr", c_int),
+                ("cfa_instructionsp", C_AggregationInstruction * MAX_AGG_INSTR)
             ]
 
 class C_FragmentDimension(Structure):
     _fields_ = [("name", c_char_p),
                 ("length", c_int),
                 ("cfa_dim_id", c_int)
-            ]
-
-class C_Fragment(Structure):
-    _fields_ = [("location", POINTER(c_size_t)),
-                ("index", POINTER(c_size_t)),
-                ("file", c_char_p),
-                ("format", c_char_p),
-                ("address", c_char_p),
-                ("units", c_char_p),
-                ("cfa_dtype", C_DataType),
-                ("linear_index", c_int)
             ]

@@ -30,7 +30,7 @@ class CFAGroup:
         )
         if (cfa_err != 0):
             raise CFAException(cfa_err)
-        return cfa_cont_p[0]
+        return cfa_cont_p.contents
 
     @property
     def _dim_ids(self) -> list[int]:
@@ -62,7 +62,7 @@ class CFAGroup:
             grpids.append(container.cfa_contids[g])
         return grpids
 
-    def addDim(self, dimname: str, dtype: CFAPython.CFADataType=4, 
+    def addDim(self, dimname: str, dtype: CFAPython.CFAType=4, 
                length: int=1) -> object:
         """Add a dimension"""
         cfa_dim_id = c_int(-1)
