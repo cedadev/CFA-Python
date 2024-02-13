@@ -10,10 +10,12 @@ from CFAPython.CFADimension import CFADimension
 from ctypes import *
 
 class CFAVariable:
-    def __init__(self, parent_id: int = -1, id: int = -1):
+    def __init__(self, parent_id: int = -1, id: int = -1, nc_object: object=None):
         """Create a CFA Variable from a parent_id and an id"""
         self.__parent_id = parent_id
         self.__cfa_id = id
+        self._nc_object = nc_object
+        self._dimensions = []
 
     @property
     def _variable(self) -> object:
@@ -51,8 +53,26 @@ class CFAVariable:
         for d in range(0, self.ndims):
             dimids.append(variable.cfa_dim_idp[d])
         return dimids
+    
+    @property
+    def nc(self) -> object:
+        """Return the netcdf object this variable maps to."""
+        return self._nc_object
 
-    def setAggInstr(self, agg_instrs: dict) -> None:
+    @property
+    def nc_id(self) -> object:
+        """Return the underlying id (in the C library) of the variable this maps to"""
+        return self._nc_object._varid
+
+    def parse(self, parent: object) -> None:
+        """Assign netCDF dimensions to """
+        self._dimensions = []
+        for d in self._dim_ids:
+            dim = CFADimension(self.__parent_id, d)
+            dim._nc_object = parent._nc_object.dimensions[dim.name]
+            self._dimensions.append(dim)
+
+    def setAggregationInstruction(self, agg_instrs: dict) -> None:
         """Set the aggration instructions - that is the location, file, format,
         and address fields in the AggregationInstructions associated with this
         variable, as well as arbitrary aggregation instructions."""
@@ -68,8 +88,8 @@ class CFAVariable:
             if (cfa_err != 0):
                 raise CFAException(cfa_err)
 
-    def setFragNum(self, frag_def: list[int]) -> None:
-        """Set the Fragment definitions, i.e. how many times each dimension
+    def setFragmentDefinition(self, frag_def: list[int]) -> None:
+        """Set the Fragmentation definitions, i.e. how many times each dimension
         is subdivided."""
         # create the fragment location as a pointer to a size_t array
         if len(frag_def) != 0:
@@ -84,8 +104,8 @@ class CFAVariable:
         if (cfa_err != 0):
             raise CFAException(cfa_err)
 
-    def setFrag(self, frag_loc: iter = None, data_loc: iter = None,
-                frag: dict = None) -> None:
+    def setFragment(self, frag_loc: iter = None, data_loc: iter = None,
+                    frag: dict = None) -> None:
         """Set the data for a fragment"""
         # create the fragment location as a pointer to a size_t array
         if frag_loc and len(frag_loc) != 0:
@@ -158,14 +178,16 @@ class CFAVariable:
             if cfa_err != 0:
                 raise CFAException(cfa_err)
 
-    def getDims(self) -> list[object]:
+    @property
+    def dimensions(self) -> list[object]:
         """Get the list of CFADimensions defined for this variable"""
-        dims = []
-        for d in self._dim_ids:
-            dims.append(CFADimension(self.__parent_id, d))
-        return dims
+        return self._dimensions
+    
+    def getDimensions(self) -> list[object]:
+        """Wrapper for above dimensions function"""
+        return self.dimensions
 
-    def getDim(self, dimname: str) -> object:
+    def getDimension(self, dimname: str) -> object:
         """Get a single dimension attached to this variable, matching the
         name"""
         dims = self.getDims()
@@ -173,17 +195,8 @@ class CFAVariable:
             if dim.name == dimname:
                 return dim
         raise CFAException("Dimension {} not found".format(dimname))
-
-    def getDimName(self, dimnum: int) -> str:
-        """Get the name of a dimension attached to this variable"""
-        dims = self.getDims()
-        if dimnum >= len(dims):
-            raise CFAException(
-                "Dimension number {} is out of range".format(dimnum)
-            )
-        return dims[dimnum].name
         
-    def getFragDef(self) -> list[int]:
+    def getFragmentDefinition(self) -> list[int]:
         """Get the fragment definition for this variable.  This returns a
         list of integers, the length of the number of dimensions this variable
         is defined over.  Each element in the list is the number of times the
@@ -201,7 +214,7 @@ class CFAVariable:
             frag_def.append(frag_dim_p.contents.length)
         return frag_def
 
-    def getFragDimLen(self, dimname: str) -> int:
+    def getFragmentDimensionSize(self, dimname: str) -> int:
         """Get the number of fragments along a particular dimensions"""
         frag_dim_lens = self.getFragDef()
         dims = self.getDims()
@@ -210,8 +223,8 @@ class CFAVariable:
                 return frag_dim_lens[d]
         raise CFAException("Dimension {} not found".format(dimname))
 
-    def getFrag(self, frag_loc: list[int] = [], 
-                data_loc: list[int] = []) -> object:
+    def getFragment(self, frag_loc: list[int] = [], 
+                    data_loc: list[int] = []) -> object:
         """Get a fragment in a CFAVariable, either from a Fragment Location,
         or a Data Location."""
 

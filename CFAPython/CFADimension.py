@@ -8,10 +8,11 @@ from CFAPython.CFAExceptions import CFAException
 from ctypes import c_int, pointer
 
 class CFADimension:
-    def __init__(self, parent_id: int = -1, id: int = -1):
+    def __init__(self, parent_id: int = -1, id: int = -1, nc_object: object=None):
         """Create a CFA Dimension from a parent_id and an id"""
         self.__parent_id = parent_id
         self.__cfa_id = id
+        self._nc_object = nc_object
 
     @property
     def _dimension(self) -> object:
@@ -33,7 +34,7 @@ class CFADimension:
         return self._dimension.name.decode('utf-8')
 
     @property
-    def len(self) -> int:
+    def size(self) -> int:
         """Return the length of the dimension"""
         return self._dimension.length
 
@@ -41,3 +42,13 @@ class CFADimension:
     def type(self) -> int:
         """Return the datatype of the dimension"""
         return CFAPython.CFAType(self._dimension.cfa_dtype.type)
+    
+    @property
+    def nc(self) -> object:
+        """Return the netcdf object this dimension maps to."""
+        return self._nc_object
+
+    @property
+    def nc_id(self) -> object:
+        """Return the underlying id (in the C library) of the dimension this maps to"""
+        return self._nc_object._dimid

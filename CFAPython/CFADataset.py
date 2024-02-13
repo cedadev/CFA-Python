@@ -1,6 +1,7 @@
 
 import CFAPython
 from CFAPython.CFAGroup import CFAGroup
+from CFAPython.CFAVariable import CFAVariable
 from CFAPython.CFAExceptions import CFAException
 from CFAPython import CFAFileFormat
 
@@ -8,14 +9,15 @@ from netCDF4 import Dataset
 
 from ctypes import *
 
-class _CFADataset:
+class _CFADataset(CFAGroup):
         
-    def __init__(self, filename, mode='r', format=CFAFileFormat.CFANetCDF, x_id=0):
+    def __init__(self, filename: str, mode: str='r', 
+                 format: CFAFileFormat=CFAFileFormat.CFANetCDF, 
+                 nc_object: object=None):
+        super().__init__(0, nc_object)
         self.__mode = mode
         self.__format = format
         self.__filename = filename
-        self._cfa_id = 0
-        self._x_id = x_id
         # if this is a CFA file then create the CFA instance
         if format == CFAFileFormat.CFANetCDF:
             # create a string buffer and encode the Python path into it
@@ -23,27 +25,25 @@ class _CFADataset:
             # mode is either "r" or "w"
             self.__mode = mode
             if (self.__mode == "w"):
-                pass
-            #     # create the CFA object - this doesn't do any file manipulation yet
-            #     cfa_id = c_int(0)
-            #     cfa_err = CFAPython.lib.cfa_create(
-            #         cpath, c_int(format), byref(cfa_id)
-            #     )
-            #     if (cfa_err != 0):
-            #         raise CFAException(cfa_err)
-            #     self._cfa_id = cfa_id
+                # create the CFA object - this doesn't do any file manipulation yet
+                cfa_id = c_int(0)
+                cfa_err = CFAPython.lib.cfa_create(
+                    cpath, c_int(format), byref(cfa_id)
+                )
+                if (cfa_err != 0):
+                    raise CFAException(cfa_err)
+                self._cfa_id = cfa_id
             elif (self.__mode == "r"):
                 # get thet netCDF file id from the parent netCDF dataset
                 cfa_id = c_int(0)
                 cfa_err = CFAPython.lib.cfa_load(
-                    cpath, c_int(self._x_id), c_int(format), byref(cfa_id)
+                    cpath, c_int(self.nc_id), c_int(format), byref(cfa_id)
                 )
                 if (cfa_err != 0):
                     raise CFAException(cfa_err)
                 self._cfa_id = cfa_id
             else:
                 raise CFAException("Unknown mode")
-
 
     def serialise(self):
         pass
@@ -54,7 +54,6 @@ class _CFADataset:
         #     )
         #     if (cfa_err != 0):
         #         raise CFAException(cfa_err)
-
 
     def __del__(self):
         """Serialise if self.mode == "w" and then close the CFA-netCDF file"""
@@ -70,18 +69,15 @@ class _CFADataset:
         #     raise CFAException(cfa_err)
         pass
 
-
     @property
     def id(self) -> int:
         "Return the CFA id for the Dataset"
         return self._cfa_id
 
-
     @property
     def path(self) -> str:
         """Return the path of the Dataset"""
         return self._container.path.decode('utf-8')
-
 
     @property
     def format(self) -> CFAPython.CFAFileFormat:
@@ -99,8 +95,8 @@ class CFADataset(Dataset):
     _private_atts = ["CFA",]
 
     def __init__(self, filename, mode='r', clobber=True, format='NETCDF4',
-                     diskless=False, persist=False, keepweakref=False,
-                     memory=None, encoding=None, parallel=False, **kwargs):
+                 diskless=False, persist=False, keepweakref=False,
+                 memory=None, encoding=None, parallel=False, **kwargs):
         """Create a CFA object within a netCDF4 Dataset and either read it in from
         a CFA-netCDF file, or create the file to write to.
         (Comm and Info from netCDF4-python not supported as arguments currently)
@@ -115,23 +111,26 @@ class CFADataset(Dataset):
                          format=in_format, diskless=diskless, persist=persist, 
                          keepweakref=keepweakref, memory=memory, encoding=encoding, 
                          parallel=parallel, kwargs=kwargs)
-        # only parse if the file is a CFA file
+        # only parse or serialise if the file is a CFA file
         if format == CFAFileFormat.CFANetCDF:
             self.CFA = _CFADataset(
-                filename=filename, format=format, mode=mode, x_id=self._grpid
+                filename=filename, format=format, mode=mode, nc_object=self
             )
         else:
             self.CFA = None
 
+        # parse - this will assign the netCDF variables and dimensions
+        # to the CFA instances 
+        if self.CFA and mode == 'r':
+            self.CFA.parse()
 
-    def __getattr__(self, name):
+    def __getattr__(self, name) -> object:
         if name in CFADataset._private_atts:
             return self.__dict__[name]
         else:
             return Dataset.__getattr__(self, name)
 
-
-    def __setattr__(self, name, value):
+    def __setattr__(self, name, value) -> None:
         """Override the __setattr__ for the Dataset so as to assign its
         private variables."""
         if name in CFADataset._private_atts:

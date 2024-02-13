@@ -51,6 +51,24 @@ def get_netcdf_library_path():
     else:
         raise NotImplementedError("Platform is currently not supported")
 
+def get_netcdf_libraries():
+    # get the names of the netcdf libraries, by searching the library path
+    # for "netcdf"
+    path = get_netcdf_library_path()
+    libraries = []
+    for d in path:
+        for f in os.listdir(d):
+            if "netcdf" in f:
+                # on the mac, libraries are suffixed by "dylib", but the linker doesn't
+                # want that
+                if sys.platform == 'darwin':
+                    lib_name = f.strip(".dylib")
+                    libraries.append(lib_name)
+                else:
+                    raise NotImplementedError("Platform is currently not supported")
+    return libraries
+            
+
 def build_cfa_extension():
     # fetch the CFA-C source code from GitHub or local
     if True:
@@ -81,20 +99,21 @@ def build_cfa_extension():
                               os.path.join(src_dir, 'parsers')],
                 extra_compile_args=["-D_DEBUG"],
                 library_dirs=lib_dirs,
-                libraries=["netcdf.19"],
+                libraries=get_netcdf_libraries(),
                 language='c',
                 sources=cfa_sources)
     return [cfa_c]
 
-setup(name='CFAPython',
-    version=MAJOR_VERSION + '.' + MINOR_VERSION,
-    description='Python bindings for the CFA-C library',
-    author='Neil Massey',
-    author_email='neil.massey@stfc.ac.uk',
-    url='https://github.com/cedadev/CFA-python',
-    long_description = '''
-Python bindings for the CFA-C library.
-''',
-    packages=["CFAPython"],
-    ext_modules = build_cfa_extension()
-)
+if __name__ == "__main__":
+    setup(name='CFAPython',
+        version=MAJOR_VERSION + '.' + MINOR_VERSION,
+        description='Python bindings for the CFA-C library',
+        author='Neil Massey',
+        author_email='neil.massey@stfc.ac.uk',
+        url='https://github.com/cedadev/CFA-python',
+        long_description = '''
+    Python bindings for the CFA-C library.
+    ''',
+        packages=["CFAPython"],
+        ext_modules = build_cfa_extension()
+    )
