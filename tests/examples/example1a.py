@@ -7,51 +7,67 @@ import os
 
 # set the example path to be relative to this file
 this_path = os.path.dirname(__file__)
-example1_path = os.path.join(this_path, "../../examples/test/example1.nc")
+example1a_path = os.path.join(this_path, "../../examples/test/example1a.nc")
 
-def example1_save():
-    print("Example 1 save")
+def example1a_save():
+    print("Example 1a save")
 
     # check the target directory exists
-    dir = os.path.dirname(example1_path)
+    dir = os.path.dirname(example1a_path)
     if not (os.path.exists(dir)):
         os.mkdir(dir)
 
     # create the Dataset (AggregationContainer)
-    ds = CFADataset(example1_path, mode="w", format=CFAFileFormat.CFANetCDF)
+    ds = CFADataset(example1a_path, mode="w", format=CFAFileFormat.CFANetCDF)
     # add the CFA dimensions (AggregatedDimensions)
-    time = ds.CFA.createDimension("time", CFAType.CFAInt, 12)
-    assert(time.nc is ds.dimensions["time"])
+    time_dim = ds.CFA.createDimension("time", CFAType.CFAInt, 12)
+    assert(time_dim.nc is ds.dimensions["time"])
 
-    level = ds.CFA.createDimension("level", CFAType.CFADouble, 1)
-    assert(level.nc is ds.dimensions["level"])
+    level_dim = ds.CFA.createDimension("level", CFAType.CFADouble, 1)
+    assert(level_dim.nc is ds.dimensions["level"])
 
-    latitude = ds.CFA.createDimension("latitude", CFAType.CFADouble, 73)
-    assert(latitude.nc is ds.dimensions["latitude"])
+    latitude_dim = ds.CFA.createDimension("latitude", CFAType.CFADouble, 73)
+    assert(latitude_dim.nc is ds.dimensions["latitude"])
     
-    longitude = ds.CFA.createDimension("longitude", CFAType.CFADouble, 144)
-    assert(longitude.nc is ds.dimensions["longitude"])
+    longitude_dim = ds.CFA.createDimension("longitude", CFAType.CFADouble, 144)
+    assert(longitude_dim.nc is ds.dimensions["longitude"])
+
+    # defining the CFA dimensions also creates the netCDF Dimensions and the 
+    # corresponding Dimension Variables.  We can now add metadata and data to these
+    # Dimension Variables.
+    time_var = ds.variables["time"]
+    time_var.standard_name = "time"
+    time_var.units = "days since 2001-01-01"
+
+    level_var = ds.variables["level"]
+    level_var.standard_name = "height_above_mean_sea_level"
+    level_var.units = "m"
+
+    latitude_var = ds.variables["latitude"]
+    latitude_var.standard_name = "latitude"
+    latitude_var.units = "degrees_north"
+
+    longitude_var = ds.variables["longitude"]
+    longitude_var.standard_name = "longitude"
+    longitude_var.units = "degrees_east"
 
     # add the CFA variable (AggregationVariable), with the AggregatedDimensions
-    # as above
+    # as defined above
     var = ds.CFA.createVariable("temp", CFAType.CFADouble,
                        ("time", "level", "latitude", "longitude"))
     assert(var.nc is ds.variables["temp"])
-    # add the metadata to the netCDF variable
-    var.nc.standard_name = "air_temperature"
-    var.nc.units = "K"
-    var.nc.cell_methods = "time: mean"
     
     # set the AggregationInstructions
     var.setAggregationInstruction({
         "location": ("aggregation_location", False, CFAType.CFAInt), 
         "file"    : ("aggregation_file", False, CFAType.CFAString),
         "format"  : ("aggregation_format", True, CFAType.CFAString),
-        "address" : ("aggregation_address", False, CFAType.CFAString)
+        "address" : ("aggregation_address", False, CFAType.CFAString),
     })
 
     # set the number of Fragments along each AggregatedDimension
     var.setFragmentDefinition([2,1,1,1])
+
     var.setFragment(
         frag_loc=[0,0,0,0], 
         frag={
@@ -66,12 +82,32 @@ def example1_save():
             "format" : "nc", 
             "address": "temp"
         })
-    print("----------------")
 
-def example1_load():
-    print("Example 1 load")
+    # add the metadata to the netCDF variable
+    var.nc.standard_name = "air_temperature"
+    var.nc.units = "K"
+    var.nc.cell_methods = "time: mean"
+
+    # add the data to the time Dimension Variable
+    time_var[:] = [0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334]
+
+    # the netCDF variables and corresponding CFA variables can be accessed
+    # netCDF:
+    #print(ds.variables)
+    #print(ds.dimensions)
+    #print(ds.groups)
+    # CFA:
+    #print(ds.CFA.dimensions)
+    #print(ds.CFA.variables)
+    #print(ds.CFA.groups)
+    print("----------------")
+    # don't forget to close the dataset
+    ds.close()
+
+def example1a_load():
+    print("Example 1a load")
     # load in the CFA Dataset
-    ds = CFADataset(example1_path, mode="r", format=CFAFileFormat.CFANetCDF)
+    ds = CFADataset(example1a_path, mode="r", format=CFAFileFormat.CFANetCDF)
 
     assert(ds.CFA.nc is ds)
 
@@ -128,6 +164,8 @@ def example1_load():
     print("Format: ", frag["format"])
     print("Address: ", frag["address"])
 
+    ds.close()
+
 if __name__ == "__main__":
-    example1_save()
-    #example1_load()
+    example1a_save()
+    example1a_load()

@@ -4,6 +4,7 @@ from CFAPython.CFAGroup import CFAGroup
 from CFAPython.CFAVariable import CFAVariable
 from CFAPython.CFAExceptions import CFAException
 from CFAPython import CFAFileFormat
+from CFAPython.version import MAJOR_VERSION, MINOR_VERSION, REVISION
 
 from netCDF4 import Dataset 
 
@@ -45,29 +46,17 @@ class _CFADataset(CFAGroup):
             else:
                 raise CFAException("Unknown mode")
 
-    def serialise(self):
-        pass
-        # if (self.__mode == "w"):
-        #     grpid = c_int(self._grpid)
-        #     cfa_err = CFAPython.lib.cfa_serialise(
-        #         c_int(self._cfa_id), grpid
-        #     )
-        #     if (cfa_err != 0):
-        #         raise CFAException(cfa_err)
-
-    def __del__(self):
+    def close(self):
         """Serialise if self.mode == "w" and then close the CFA-netCDF file"""
-        # if (self.__mode == "w"):
-        #     grpid = c_int(self._grpid)
-        #     cfa_err = CFAPython.lib.cfa_serialise(
-        #         c_int(self._cfa_id), grpid
-        #     )
-        #     if (cfa_err != 0):
-        #         raise CFAException(cfa_err)
-        # cfa_err = CFAPython.lib.cfa_close(c_int(self._cfa_id))
-        # if (cfa_err != 0):
-        #     raise CFAException(cfa_err)
-        pass
+        if self.__mode == 'w':
+            # serialise the root group (i.e. this group)
+            self.serialise()
+            # write the global metadata
+            self._nc_object.Conventions = f"CFA-{MAJOR_VERSION}.{MINOR_VERSION}.{REVISION}"
+        
+        cfa_err = CFAPython.lib.cfa_close(self._cfa_id)
+        if (cfa_err != 0):
+            raise CFAException(cfa_err)
 
     @property
     def id(self) -> int:
@@ -92,7 +81,7 @@ class CFADataset(Dataset):
 
     # declare private atts, otherwise they will be written out into the netCDF file
     # as global variables
-    _private_atts = ["CFA",]
+    _private_atts = ["CFA", "closed"]
 
     def __init__(self, filename, mode='r', clobber=True, format='NETCDF4',
                  diskless=False, persist=False, keepweakref=False,
@@ -123,6 +112,16 @@ class CFADataset(Dataset):
         # to the CFA instances 
         if self.CFA and mode == 'r':
             self.CFA.parse()
+        self.closed = False
+
+    def close(self):
+        self.CFA.close()
+        super().close()
+        self.closed = True
+
+    def __del__(self):
+        if not self.closed:
+            raise CFAException("Dataset was not closed")
 
     def __getattr__(self, name) -> object:
         if name in CFADataset._private_atts:

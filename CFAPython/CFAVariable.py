@@ -17,6 +17,12 @@ class CFAVariable:
         self._nc_object = nc_object
         self._dimensions = []
 
+    def __str__(self):
+        return f"{self.name}: {self.__class__}: name={self.name}"
+    
+    def __repr__(self):
+        return self.__str__()
+
     @property
     def _variable(self) -> object:
         """Get the underlying CFA-C AggregationVariable for this CFAVariable.
@@ -64,8 +70,13 @@ class CFAVariable:
         """Return the underlying id (in the C library) of the variable this maps to"""
         return self._nc_object._varid
 
+    @property
+    def cfa_id(self) -> object:
+        """Return the CFA id this variable maps to."""
+        return self.__cfa_id
+
     def parse(self, parent: object) -> None:
-        """Assign netCDF dimensions to """
+        """Assign netCDF dimensions to the CFAVariable"""
         self._dimensions = []
         for d in self._dim_ids:
             dim = CFADimension(self.__parent_id, d)
@@ -139,6 +150,8 @@ class CFAVariable:
             # switch on the type to get the data in the correct format
             T = c_agg_instr_p.contents.type.type
             length = 1
+            if value is None:
+                continue
             if T == CFAType.CFANat:
                 raise CFAException(-504)
             elif T == CFAType.CFAByte:
@@ -190,7 +203,7 @@ class CFAVariable:
     def getDimension(self, dimname: str) -> object:
         """Get a single dimension attached to this variable, matching the
         name"""
-        dims = self.getDims()
+        dims = self.getDimensions()
         for dim in dims:
             if dim.name == dimname:
                 return dim
@@ -216,8 +229,8 @@ class CFAVariable:
 
     def getFragmentDimensionSize(self, dimname: str) -> int:
         """Get the number of fragments along a particular dimensions"""
-        frag_dim_lens = self.getFragDef()
-        dims = self.getDims()
+        frag_dim_lens = self.getFragmentDefinition()
+        dims = self.getDimensions()
         for d in range(0, len(dims)):
             if dims[d].name == dimname:
                 return frag_dim_lens[d]

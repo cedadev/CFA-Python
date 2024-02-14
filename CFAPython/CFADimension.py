@@ -14,6 +14,13 @@ class CFADimension:
         self.__cfa_id = id
         self._nc_object = nc_object
 
+    def __str__(self):
+        return (f"{self.name}: {self.__class__}: name={self.name}, size={self.size}, "
+                f"type={self.type}")
+    
+    def __repr__(self):
+        return self.__str__()
+
     @property
     def _dimension(self) -> object:
         """Get the underlying CFA-C AggregatedDimension for this CFADimension.
@@ -52,3 +59,8 @@ class CFADimension:
     def nc_id(self) -> object:
         """Return the underlying id (in the C library) of the dimension this maps to"""
         return self._nc_object._dimid
+    
+    @property
+    def cfa_id(self) -> object:
+        """Return the CFA id this dimension maps to."""
+        return self.__cfa_id

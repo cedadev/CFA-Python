@@ -7,9 +7,7 @@ from io import BytesIO
 import shutil
 import site
 import sys
-
-MAJOR_VERSION = '0'
-MINOR_VERSION = '6'
+from CFAPython.version import MAJOR_VERSION, MINOR_VERSION, REVISION
 
 CFA_C_VERSION_TAG = "0.0.6"
 

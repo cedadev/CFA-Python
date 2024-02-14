@@ -7,7 +7,7 @@ from CFAPython._CFADatatypes import C_AggregationContainer
 from CFAPython.CFAExceptions import CFAException
 from CFAPython.CFADimension import CFADimension
 from CFAPython.CFAVariable import CFAVariable
-from netCDF4 import Group
+from netCDF4 import Variable
 
 from ctypes import c_int, c_char_p, pointer, byref, sizeof
 
@@ -21,6 +21,7 @@ class CFAGroup:
         self._dimensions = []
         self._variables = []
         self._groups = []
+        self.__serialised = False
 
     @property
     def _container(self) -> object:
@@ -67,7 +68,8 @@ class CFAGroup:
         return grpids
 
     def parse(self) -> None:
-        """Parse the dataset that this group belongs to (or is) and attach references:
+        """Parse the dataset that this group belongs to (or is) and attach r
+        eferences:
         1. netCDF Groups to the CFA Groups
         2. netCDF Dimensions to the CFA Dimensions
         3. netCDF Variables to the CFA Variables"""
@@ -102,6 +104,38 @@ class CFAGroup:
             # parse the sub groups from this group
             grp.parse()
 
+    def serialise(self) -> None:
+        """Serialise the CFA Group into the netCDF Group.
+        Note: CFA Dataset is derived from CFA Group, so serialising the root group
+        will serialise the Dataset."""
+        # Don't serialise if already serialised
+        if self.__serialised:
+            return
+        
+        # recursively serialise any groups
+        for g in self._groups:
+            g.serialise()
+
+        # no need to serialise the dimensions - all the necessary steps for the CFA
+        # dimensions are performed by dimension.CFA.createDimension
+        
+        # serialise the variables - write out the CFA fragments and the aggregation
+        # instructions
+        for v in self._variables:
+            cfa_err = CFAPython.lib._serialise_cfa_fragments_netcdf(
+                self.nc_id, self.cfa_id, v.cfa_id
+            )
+            if (cfa_err != 0):
+                raise CFAException(cfa_err)
+            
+            cfa_err = CFAPython.lib._serialise_cfa_aggregation_instructions(
+                self.nc_id, v.nc_id, self.cfa_id, v.cfa_id                 
+            )
+            if (cfa_err != 0):
+                raise CFAException(cfa_err)
+        # indicate already serialised, so close doesn't try to serialise again
+        self.__serialised = True
+
     def createDimension(self, dimname: str, datatype: CFAPython.CFAType=4, 
                         size: int=1) -> object:
         """Add a dimension"""
@@ -117,6 +151,9 @@ class CFAGroup:
         dim = CFADimension(self._cfa_id, cfa_dim_id)
         dim._nc_object = self._nc_object.createDimension(dimname, size)
         self._dimensions.append(dim)
+        # create the netCDF Variable to go with this Dimension
+        dimtype = CFAPython.CFATypeToNumpy(datatype)
+        self._nc_object.createVariable(dimname, dimtype, (dim._nc_object,))
         return dim
 
     @property
@@ -170,11 +207,11 @@ class CFAGroup:
             raise CFAException(cfa_err)
 
         var = CFAVariable(self._cfa_id, cfa_var_id)
-        # create the netCDF variables - which has no dimensions
+        # create the netCDF variable - which has no dimensions
         vartype = CFAPython.CFATypeToNumpy(datatype)
         var._nc_object = self._nc_object.createVariable(varname, vartype)
+        self._variables.append(var)
         return var
-
 
     @property
     def variables(self) -> list[object]:
@@ -202,7 +239,11 @@ class CFAGroup:
         )
         if (cfa_err != 0):
             raise CFAException(cfa_err)
-        return CFAGroup(self._cfa_id, cfa_grp_id)
+        
+        grp = CFAGroup(self._cfa_id, cfa_grp_id)
+        grp._nc_object = self._nc_object.createGroup(grpname)
+        self._groups.append(grp)
+        return grp
 
     @property
     def groups(self) -> list[object]:
@@ -251,3 +292,8 @@ class CFAGroup:
     def nc_id(self) -> object:
         """Return the underlying id (in the C library) of the group this maps to"""
         return self._nc_object._grpid
+    
+    @property
+    def cfa_id(self) -> object:
+        """Return the CFA id this group maps to."""
+        return self._cfa_id
