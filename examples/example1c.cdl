@@ -1,0 +1,64 @@
+netcdf {
+
+  // Example 1c
+  // As for example 1a, but with the fragment URIs given as file URIs that are partly 
+  // defined by a substitution.
+
+  dimensions:
+    // Aggregated dimensions
+    time = 12 ;
+    level = 1 ;
+    latitude = 73 ;
+    longitude = 144 ;
+    // Fragment dimensions
+    f_time = 2 ;
+    f_level = 1 ;
+    f_latitude = 1 ;
+    f_longitude = 1 ;
+    // Extra dimensions
+    i = 4 ;
+    j = 2 ;
+  variables:
+    // Data variable
+    double temp ;
+      temp:standard_name = "air_temperature" ;
+      temp:units = "K" ;
+      temp:cell_methods = "time: mean" ;
+      temp:aggregated_dimensions = "time level latitude longitude" ;
+      temp:aggregated_data = "location: aggregation_location
+                              file: aggregation_file
+                              format: aggregation_format
+                              address: aggregation_address" ;
+    // Coordinate variables
+    double time(time) ;
+      time:standard_name = "time" ;
+      time:units = "days since 2001-01-01" ;
+    double level(level) ;
+      level:standard_name = "height_above_mean_sea_level" ;
+      level:units = "m" ;
+    double latitude(latitude) ;
+      latitude:standard_name = "latitude" ;
+      latitude:units = "degrees_north" ;
+    double longitude(longitude) ;
+      longitude:standard_name = "longitude" ;
+      longitude:units = "degrees_east" ;
+    // Aggregation definition variables
+    int aggregation_location(i, j) ;
+    string aggregation_file(f_time, f_level, f_latitude, f_longitude) ;
+      aggregation_file:substitutions = "${BASE}: file://data1/" ;
+    string aggregation_format ;
+    string aggregation_address(f_time, f_level, f_latitude, f_longitude) ;
+
+  // global attributes:
+    :Conventions = "CF-1.10 CFA-0.6.2" ;
+  data:
+    temp = _ ;
+    time = 0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334 ;
+    aggregation_location = 6, 6,
+                           1, _,
+                           73, _,
+                           144, _ ;
+    aggregation_file = "${BASE}January-June.nc", "${BASE}July-December.nc" ;
+    aggregation_format = "nc" ;
+    aggregation_address = "temp", "temp" ;
+}
