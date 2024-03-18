@@ -1,11 +1,9 @@
 netcdf {
 
-  // Example 1a
-  // An aggregated data variable whose aggregated data comprises two fragments.
-  // Each fragment spans half of the aggregated time dimension and the whole of
-  // the other three aggregated dimensions, and is stored in an external netCDF
-  // file in a variable called temp. Both fragment files have the same format,
-  // so the format variable can be stored as a scalar variable.
+  // Example 1b
+  // As for example 1a, but with the inclusion of the non-standard aggregation 
+  // instruction tracking_id: fragment_id that defines an attribute for each fragment 
+  // stored in the fragment_id variable.
 
   dimensions:
     // Aggregated dimensions
@@ -31,7 +29,8 @@ netcdf {
       temp:aggregated_data = "location: aggregation_location
                               file: aggregation_file
                               format: aggregation_format
-                              address: aggregation_address" ;
+                              address: aggregation_address
+                              tracking_id: fragment_id" ;
     // Coordinate variables
     double time(time) ;
       time:standard_name = "time" ;
@@ -50,6 +49,8 @@ netcdf {
     string aggregation_file(f_time, f_level, f_latitude, f_longitude) ;
     string aggregation_format ;
     string aggregation_address(f_time, f_level, f_latitude, f_longitude) ;
+    // Fragment metadata variables
+    string fragment_id(f_time, f_level, f_latitude, f_longitude) ;
 
   // global attributes:
     :Conventions = "CF-1.10 CFA-0.6.2" ;
@@ -63,4 +64,5 @@ netcdf {
     aggregation_file = "January-June.nc", "July-December.nc" ;
     aggregation_format = "nc" ;
     aggregation_address = "temp", "temp" ;
+    fragment_id = "764489ad-7bee-4228", "a4f8deb3-fae1-26b6" ;
 }

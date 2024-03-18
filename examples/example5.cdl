@@ -57,7 +57,7 @@ netcdf {
     string aggregation_format ;
 
   // global attributes:
-    :Conventions = "CF-1.9 CFA-0.6" ;
+    :Conventions = "CF-1.10 CFA-0.6.2" ;
   data:
     temp = _ ;
     time = _ ;

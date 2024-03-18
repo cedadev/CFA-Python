@@ -43,10 +43,10 @@ netcdf {
       longitude:units = "degrees_east" ;
 
   // global attributes:
-    :Conventions = "CF-1.9 CFA-0.6" ;
+    :Conventions = "CF-1.10 CFA-0.6.2" ;
   data:
     temp = _ ;
-    time = 0.0, 31.0, 59.0, 90.0, 120.0, 151.0, 181.0, 212.0, 243.0, 273.0, 304.0, 334.0 ;
+    time = 0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334 ;
 
   group: aggregation {
     dimensions:
