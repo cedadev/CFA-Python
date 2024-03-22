@@ -9,7 +9,7 @@ import site
 import sys
 from CFAPython.version import MAJOR_VERSION, MINOR_VERSION, REVISION
 
-CFA_C_VERSION_TAG = "0.0.6"
+CFA_C_VERSION_TAG = "0.6.1"
 
 CFA_C_URL = "https://github.com/cedadev/CFA-C/archive/refs/tags/"
 
