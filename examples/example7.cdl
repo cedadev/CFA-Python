@@ -30,7 +30,7 @@ netcdf {
       time:units = "days since 2001-01-01" ;
 
   // global attributes:
-    :Conventions = "CF-1.9 CFA-0.6" ;
+    :Conventions = "CF-1.10 CFA-0.6.2" ;
   data:
     temp = _ ;
     time = 0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334 ;

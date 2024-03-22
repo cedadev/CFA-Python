@@ -1,11 +1,8 @@
 netcdf {
 
-  // Example 1
-  // An aggregated data variable whose aggregated data comprises two fragments.
-  // Each fragment spans half of the aggregated time dimension and the whole of
-  // the other three aggregated dimensions, and is stored in an external netCDF
-  // file in a variable called temp. Both fragment files have the same format,
-  // so the format variable can be stored as a scalar variable.
+  // Example 1c
+  // As for example 1a, but with the fragment URIs given as file URIs that are partly 
+  // defined by a substitution.
 
   dimensions:
     // Aggregated dimensions
@@ -48,11 +45,12 @@ netcdf {
     // Aggregation definition variables
     int aggregation_location(i, j) ;
     string aggregation_file(f_time, f_level, f_latitude, f_longitude) ;
+      aggregation_file:substitutions = "${BASE}: file://data1/" ;
     string aggregation_format ;
     string aggregation_address(f_time, f_level, f_latitude, f_longitude) ;
 
   // global attributes:
-    :Conventions = "CF-1.9 CFA-0.6" ;
+    :Conventions = "CF-1.10 CFA-0.6.2" ;
   data:
     temp = _ ;
     time = 0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334 ;
@@ -60,7 +58,7 @@ netcdf {
                            1, _,
                            73, _,
                            144, _ ;
-    aggregation_file = "January-June.nc", "July-December.nc" ;
+    aggregation_file = "${BASE}January-June.nc", "${BASE}July-December.nc" ;
     aggregation_format = "nc" ;
     aggregation_address = "temp", "temp" ;
 }

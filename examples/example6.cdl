@@ -20,46 +20,46 @@ netcdf {
   variables:
     // Data variable
     float temp(obs) ;
-    temp:standard_name = "air_temperature" ;
-    temp:units = "Celsius" ;
-    temp:coordinates = "time lat lon alt station_name" ;
-    temp:aggregated_dimensions = "obs" ;
-    temp:aggregated_data = "location: aggregation_location
+      temp:standard_name = "air_temperature" ;
+      temp:units = "Celsius" ;
+      temp:coordinates = "time lat lon alt station_name" ;
+      temp:aggregated_dimensions = "obs" ;
+      temp:aggregated_data = "location: aggregation_location
                             file: aggregation_file
                             format: aggregation_format
                             address: aggregation_address_temp" ;
     // Coordinate variables
     float time ;
-    time:standard_name = "time" ;
-    time:long_name = "time of measurement" ;
-    time:units = "days since 1970-01-01" ;
-    temp:aggregated_dimensions = "obs" ;
-    temp:aggregated_data = "location: aggregation_location
-                            file: aggregation_file
-                            format: aggregation_format
-                            address: aggregation_address_time" ;
+      time:standard_name = "time" ;
+      time:long_name = "time of measurement" ;
+      time:units = "days since 1970-01-01" ;
+      temp:aggregated_dimensions = "obs" ;
+      temp:aggregated_data = "location: aggregation_location
+                              file: aggregation_file
+                              format: aggregation_format
+                              address: aggregation_address_time" ;
     float lon(station) ;
-    lon:standard_name = "longitude";
-    lon:long_name = "station longitude";
-    lon:units = "degrees_east";
-    temp:aggregated_dimensions = "obs" ;
-    temp:aggregated_data = "location: aggregation_location_latlon
-                            file: aggregation_file
-                            format: aggregation_format
-                            address: aggregation_address_lon" ;
+      lon:standard_name = "longitude";
+      lon:long_name = "station longitude";
+      lon:units = "degrees_east";
+      temp:aggregated_dimensions = "obs" ;
+      temp:aggregated_data = "location: aggregation_location_latlon
+                              file: aggregation_file
+                              format: aggregation_format
+                              address: aggregation_address_lon" ;
     float lat(station) ;
-    lat:standard_name = "latitude";
-    lat:long_name = "station latitude" ;
-    lat:units = "degrees_north" ;
-    temp:aggregated_dimensions = "obs" ;
-    temp:aggregated_data = "location: aggregation_location_latlon
-                            file: aggregation_file
-                            format: aggregation_format
-                            address: aggregation_address_lat" ;
+      lat:standard_name = "latitude";
+      lat:long_name = "station latitude" ;
+      lat:units = "degrees_north" ;
+      temp:aggregated_dimensions = "obs" ;
+      temp:aggregated_data = "location: aggregation_location_latlon
+                              file: aggregation_file
+                              format: aggregation_format
+                              address: aggregation_address_lat" ;
     // Compression encoding variable
     int row_size(station) ;
-    row_size:long_name = "number of observations per station" ;
-    row_size:sample_dimension = "obs" ;
+      row_size:long_name = "number of observations per station" ;
+      row_size:sample_dimension = "obs" ;
     // Aggregation definition variables
     int aggregation_location(i, j) ;
     int aggregation_location_latlon(i, j) ;
@@ -71,7 +71,7 @@ netcdf {
     string aggregation_address_lon(f_station) ;
 
   // global attributes:
-    :Conventions = "CF-1.9 CFA-0.6" ;
+    :Conventions = "CF-1.10 CFA-0.6.2" ;
     :featureType = "timeSeries";
   data:
     temp = _ ;
