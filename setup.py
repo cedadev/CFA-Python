@@ -12,7 +12,6 @@ from CFAPython.version import MAJOR_VERSION, MINOR_VERSION, REVISION
 CFA_C_VERSION_TAG = "0.0.6"
 
 CFA_C_URL = "https://github.com/cedadev/CFA-C/archive/refs/tags/"
-CFA_C_LOCAL = "/Users/neil.massey/Coding/CFA-C"
 
 # create a temporary directory to store the downloaded CFA-C source code
 # it has to be global so that the tmp_dir object doesn't go out of scope and 
