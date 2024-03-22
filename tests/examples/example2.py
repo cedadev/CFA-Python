@@ -4,6 +4,7 @@ from CFAPython import CFAFileFormat
 from CFAPython import CFAType
 
 import os.path
+import sys
 
 # set the example path to be relative to this file
 this_path = os.path.dirname(__file__)
@@ -43,7 +44,7 @@ def example2_save():
 
     # add the CFA variable (AggregationVariable), with the AggregatedDimensions
     # as above
-    var = ds.CFA.createVariable("temp", CFAType.CFAShort,
+    var = ds.CFA.createVariable("temp", CFAType.CFADouble,
                        ("time", "level", "latitude", "longitude"))
     assert(var.nc is ds.variables["temp"])
 
@@ -72,11 +73,13 @@ def example2_save():
             "address": "temp2",
         }
     )
+    # add the data to the time Dimension Variable
+    time_var[:] = [0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334]
 
     # Variables can be created in the Dataset
     temp2_var = ds.createVariable("temp2", "f8", ("time", "latitude", "longitude"))
     temp2_var.units = "degreesC"
-    temp2_var[0, 0, 0:6] = [4.5, 3.0, 0.0, -2.6, -5.6, -10.2]
+    temp2_var[0,0,0:6] = [4.5, 3.0, 0.0, -2.6, -5.6, -10.2]
 
     print("----------------")
     ds.close()
@@ -109,8 +112,6 @@ def example2_load():
     for d in var.getDimensions():
         print(d.name, d.size, d.type)
 
-    print(var.getFragmentDefinition())
-
     print("----------------")
 
     # get the fragment definition
@@ -137,5 +138,9 @@ def example2_load():
     ds.close()
 
 if __name__ == "__main__":
-    example2_save()
-    example2_load()
+    if sys.argv[1] == "S":
+        example2_save()
+    elif sys.argv[1] == "L":
+        example2_load()
+    else:
+        raise SystemExit(f"Command line option: {sys.argv[1]} not recognised.")

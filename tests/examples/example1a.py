@@ -4,6 +4,7 @@ from CFAPython import CFAFileFormat
 from CFAPython import CFAType
 
 import os
+import sys
 
 # set the example path to be relative to this file
 this_path = os.path.dirname(__file__)
@@ -91,16 +92,6 @@ def example1a_save():
     # add the data to the time Dimension Variable
     time_var[:] = [0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334]
 
-    # the netCDF variables and corresponding CFA variables can be accessed
-    # netCDF:
-    #print(ds.variables)
-    #print(ds.dimensions)
-    #print(ds.groups)
-    # CFA:
-    #print(ds.CFA.dimensions)
-    #print(ds.CFA.variables)
-    #print(ds.CFA.groups)
-    print("----------------")
     # don't forget to close the dataset
     ds.close()
 
@@ -111,24 +102,16 @@ def example1a_load():
 
     assert(ds.CFA.nc is ds)
 
+    print("----------------")
+
     # get and print the CFA AggregatedDimensions
-    print("GLOBAL CFA DIMENSIONS: ")
+    print("GLOBAL AGGREGATED DIMENSIONS: ")
 
-    time = ds.CFA.getDimension("time")
-    assert(time.nc is ds.dimensions["time"])
-    print(time.name, time.size, time.type, time.nc)
-
-    level = ds.CFA.getDimension("level")
-    assert(level.nc is ds.dimensions["level"])
-    print(level.name, level.size, level.type, level.nc)
-
-    latitude = ds.CFA.getDimension("latitude")
-    assert(latitude.nc is ds.dimensions["latitude"])
-    print(latitude.name, latitude.size, latitude.type, latitude.nc)
-
-    longitude = ds.CFA.getDimension("longitude")
-    assert(longitude.nc is ds.dimensions["longitude"])
-    print(longitude.name, longitude.size, longitude.type, longitude.nc)
+    cfa_dims = ds.CFA.getDimensions()
+    
+    for d in cfa_dims:
+        assert(d.nc is ds.dimensions[d.name])
+        print(d.name, d.size, d.type, d.nc)
 
     print("----------------")
 
@@ -136,16 +119,15 @@ def example1a_load():
     var = ds.CFA.getVariable("temp")
     assert(var.nc is ds.variables["temp"])
 
-    print(f"VARIABLE {var.name} DIMENSIONS: ")
+    print(f"VARIABLE: {var.name} AGGREGATED DIMENSIONS: ")
     # get the AggregatedDimensions
     for d in var.dimensions:
+        assert(d.nc is ds.dimensions[d.name])
         print(d.name, d.size, d.type, d.nc)
 
+    print("----------------")
     print(f"FRAGMENT DEFINITION: {var.getFragmentDefinition()}")
     print("----------------")
-
-    # get the fragment definition
-    frag_def = var.getFragmentDefinition()
 
     # get the 1st fragment and output the data
     frag = var.getFragment(frag_loc=[0,0,0,0])
@@ -167,5 +149,9 @@ def example1a_load():
     ds.close()
 
 if __name__ == "__main__":
-    example1a_save()
-    example1a_load()
+    if sys.argv[1] == "S":
+        example1a_save()
+    elif sys.argv[1] == "L":
+        example1a_load()
+    else:
+        raise SystemExit(f"Command line option: {sys.argv[1]} not recognised.")

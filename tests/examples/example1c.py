@@ -4,6 +4,7 @@ from CFAPython import CFAFileFormat
 from CFAPython import CFAType
 
 import os
+import sys
 
 # set the example path to be relative to this file
 this_path = os.path.dirname(__file__)
@@ -94,8 +95,6 @@ def example1c_save():
 
     # add the data to the time Dimension Variable
     time_var[:] = [0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334]
-
-    print("----------------")
     # don't forget to close the dataset
     ds.close()
 
@@ -162,5 +161,9 @@ def example1c_load():
     ds.close()
 
 if __name__ == "__main__":
-    example1c_save()
-    #example1c_load()
+    if sys.argv[1] == "S":
+        example1c_save()
+    elif sys.argv[1] == "L":
+        example1c_load()
+    else:
+        raise SystemExit(f"Command line option: {sys.argv[1]} not recognised.")

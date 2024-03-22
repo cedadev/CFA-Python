@@ -4,6 +4,7 @@ from CFAPython import CFAFileFormat
 from CFAPython import CFAType
 
 import os
+import sys
 
 # set the example path to be relative to this file
 this_path = os.path.dirname(__file__)
@@ -93,7 +94,6 @@ def example1b_save():
 
     # add the data to the time Dimension Variable
     time_var[:] = [0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334]
-    print("----------------")
     # don't forget to close the dataset
     ds.close()
 
@@ -137,9 +137,6 @@ def example1b_load():
     print(f"FRAGMENT DEFINITION: {var.getFragmentDefinition()}")
     print("----------------")
 
-    # get the fragment definition
-    frag_def = var.getFragmentDefinition()
-
     # get the 1st fragment and output the data
     frag = var.getFragment(frag_loc=[0,0,0,0])
     print("Index: ", frag["index"])
@@ -160,5 +157,9 @@ def example1b_load():
     ds.close()
 
 if __name__ == "__main__":
-    example1b_save()
-    example1b_load()
+    if sys.argv[1] == "S":
+        example1b_save()
+    elif sys.argv[1] == "L":
+        example1b_load()
+    else:
+        raise SystemExit(f"Command line option: {sys.argv[1]} not recognised.")

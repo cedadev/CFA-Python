@@ -4,6 +4,7 @@ from CFAPython import CFAFileFormat
 from CFAPython import CFAType
 
 import os.path
+import sys
 
 # set the example path to be relative to this file
 this_path = os.path.dirname(__file__)
@@ -18,92 +19,134 @@ def example3_save():
         os.mkdir(dir)
 
     # create the Dataset (AggregationContainer)
-    cfa = CFADataset(example3_path, CFAFileFormat.CFANetCDF, "w")
+    ds = CFADataset(example3_path, mode="w", format=CFAFileFormat.CFANetCDF)
 
     # add the CFA dimensions (AggregatedDimensions)
-    cfa.addDim("time", CFAType.CFADouble, 12)
-    cfa.addDim("level", CFAType.CFADouble, 1)
-    cfa.addDim("latitude", CFAType.CFADouble, 73)
-    cfa.addDim("longitude", CFAType.CFADouble, 144)
+    ds.CFA.createDimension("time", CFAType.CFADouble, 12)
+    time_var = ds.variables["time"]
+    time_var.standard_name = "time"
+    time_var.units = "days since 2001-01-01"
+
+    ds.CFA.createDimension("level", CFAType.CFADouble, 1)
+    level_var = ds.variables["level"]
+    level_var.standard_name = "height_above_mean_sea_level"
+    level_var.units = "m"
+    
+    ds.CFA.createDimension("latitude", CFAType.CFADouble, 73)
+    latitude_var = ds.variables["latitude"]
+    latitude_var.standard_name = "latitude"
+    latitude_var.units = "degrees_north"
+
+    ds.CFA.createDimension("longitude", CFAType.CFADouble, 144)
+    longitude_var = ds.variables["longitude"]
+    longitude_var.standard_name = "longitude"
+    longitude_var.units = "degrees_east"
 
     # add the CFA group / container
-    grp = cfa.addGrp("aggregation")
+    grp = ds.CFA.createGroup("aggregation")
 
     # add the CFA variable (AggregationVariable), with the AggregatedDimensions
     # as above
-    var = cfa.addVar("temp", CFAType.CFADouble,
-                     ("time", "level", "latitude", "longitude"))
+    var = ds.CFA.createVariable("temp", CFAType.CFADouble,
+                            ("time", "level", "latitude", "longitude"))
+    # set the metadata via the .nc member
+    var.nc.standard_name = "air_temperature"
+    var.nc.units = "K"
+    var.nc.cell_methods = "time: mean"
 
     # set the AggregationInstructions
-    var.setAggInstr(location="/aggregation/location", 
-                    file="/aggregation/file",
-                    format="/aggregation/format", format_scalar=True,
-                    address="/aggregation/address")
+    var.setAggregationInstruction({
+        "location" : ("/aggregation/location", False, CFAType.CFAInt),
+        "file"     : ("/aggregation/file", False, CFAType.CFAString),
+        "format"   : ("/aggregation/format", True, CFAType.CFAString),
+        "address"  : ("/aggregation/address", False, CFAType.CFAString)
+    })
 
     # set the number of Fragments along each AggregatedDimension
-    var.setFragNum([2,1,1,1])
-    var.setFrag(frag_loc=[0,0,0,0],
-                file=None, format=None, address="temp1", units="")
-    var.setFrag(frag_loc=[1,0,0,0],
-                file=None, format=None, address="temp2", units="")
+    var.setFragmentDefinition([2,1,1,1])
+    var.setFragment(
+        frag_loc=[0,0,0,0],
+        frag={
+            "file"    : None, 
+            "format"  : None, 
+            "address" : "temp1",
+        })
+    var.setFragment(
+        frag_loc=[1,0,0,0],
+        frag={
+            "file"    : None, 
+            "format"  : None, 
+            "address" : "temp2", 
+        })
 
-    # note that the temp2 local variable has not been created as that would
-    # require interfacing with the Python netCDF-4 routines, which I have yet
-    # to write / figure out how to do
-    print("----------------")
+    # Variables can now be created in the Dataset, and in the group, and add metadata
+    var1 = grp._nc_object.createVariable("temp1", "f8", ("time", "latitude", "longitude"))
+    var1.units = "Kelvin"
+    var2 = grp._nc_object.createVariable("temp2", "f8", ("time", "latitude", "longitude"))
+    var2.units = "degreesC"
+
+    # add the time data for the time dimension
+    time_var._nc_object[:] = 0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334
+
+    # add the temperature data for the two variables
+    var1[0,0,0:6] = 270.3, 272.5, 274.1, 278.5, 280.3, 283.6
+    var2[0,0,0:6] = 4.5, 3.0, 0.0, -2.6, -5.6, -10.2
+    ds.close()
 
 def example3_load():
     print("Example 3 load")
     # load in the CFA Dataset
-    cfa = CFADataset(example3_path, CFAFileFormat.CFANetCDF, "r")
+    ds = CFADataset(example3_path, mode="r", format=CFAFileFormat.CFANetCDF)
 
     # get and print the CFA AggregatedDimensions
-    time = cfa.getDim("time")
-    print(time.name, time.len, time.type)
-    level = cfa.getDim("level")
-    print(level.name, level.len, level.type)
-    latitude = cfa.getDim("latitude")
-    print(latitude.name, latitude.len, latitude.type)
+    time = ds.CFA.getDimension("time")
+    print(time.name, time.size, time.type)
+
+    level = ds.CFA.getDimension("level")
+    print(level.name, level.size, level.type)
+
+    latitude = ds.CFA.getDimension("latitude")
+    print(latitude.name, latitude.size, latitude.type)
 
     print("----------------")
 
     # get the temp variable
-    var = cfa.getVar("temp")
+    var = ds.CFA.getVariable("temp")
     print(var.name)
 
     # get the AggregatedDimensions
-    for d in var.getDims():
-        print(d.name, d.len, d.type)
-
-    print(var.getFragDef())
+    for d in var.getDimensions():
+        print(d.name, d.size, d.type)
 
     print("----------------")
 
     # get the fragment definition
-    frag_def = var.getFragDef()
+    frag_def = var.getFragmentDefinition()
     print(frag_def)
 
     # get the 1st fragment and output the data
-    frag = var.getFrag(frag_loc=[0,0,0,0])
-    print("Location: ", frag.location)
-    print("File: ", frag.file)
-    print("Format: ", frag.format)
-    print("Address: ", frag.address)
-    print("Units: ", frag.units)
-    print("Dtype: ", frag.cfa_dtype)
+    frag = var.getFragment(frag_loc=[0,0,0,0])
+    print("Location: ", frag["location"])
+    print("File: ", frag["file"])
+    print("Format: ", frag["format"])
+    print("Address: ", frag["address"])
 
     print("----------------")
 
     # get the 2nd fragment and output the data
-    frag = var.getFrag(data_loc=[6,0,0,0])
-    print("index: ", frag.index)
-    print("Location: ", frag.location)
-    print("File: ", frag.file)
-    print("Format: ", frag.format)
-    print("Address: ", frag.address)
-    print("Units: ", frag.units)
-    print("Dtype: ", frag.cfa_dtype)
+    frag = var.getFragment(data_loc=[6,0,0,0])
+    print("index: ", frag["index"])
+    print("Location: ", frag["location"])
+    print("File: ", frag["file"])
+    print("Format: ", frag["format"])
+    print("Address: ", frag["address"])
+
+    ds.close()
 
 if __name__ == "__main__":
-    #example3_save()
-    example3_load()
+    if sys.argv[1] == "S":
+        example3_save()
+    elif sys.argv[1] == "L":
+        example3_load()
+    else:
+        raise SystemExit(f"Command line option: {sys.argv[1]} not recognised.")
