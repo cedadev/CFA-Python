@@ -1,15 +1,20 @@
 import ctypes
 from importlib.machinery import EXTENSION_SUFFIXES
 import os.path
+import site
 import netCDF4      # this import has to remain to get the dynamic libraries loaded
 from enum import IntEnum
 
 from CFAPython.CFAExceptions import CFAException
 
-# load the CFA-C library
-this_path = os.path.dirname(__file__)
-libpath = os.path.join(this_path, "cfa" + EXTENSION_SUFFIXES[0])
-lib = ctypes.CDLL(libpath)
+libDLL = None
+def lib():
+    global libDLL
+    if not libDLL:
+        libpath = os.path.join(site.getsitepackages()[0], "CFAPython")
+        libpath = os.path.join(libpath, "cfa" + EXTENSION_SUFFIXES[0])
+        libDLL = ctypes.CDLL(libpath)
+    return libDLL
 
 # define the file format enum
 class CFAFileFormat(IntEnum):

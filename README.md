@@ -18,6 +18,10 @@ no longer required to compile the CFA-C library themselves.
 
         source CFA-python-venv/bin/activate
 
+1. Install the netCDF4-python library
+
+        pip install netCDF4
+
 1. Clone the `CFA-Python` repository:
 
         git clone https://github.com/cedadev/CFA-Python.git

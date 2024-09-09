@@ -28,7 +28,7 @@ class CFADimension:
         instead of querying the C_AggregatedDimension structure directly."""
         cfa_dim = C_AggregatedDimension()
         cfa_dim_p = pointer(cfa_dim)
-        cfa_err = CFAPython.lib.cfa_get_dim(
+        cfa_err = CFAPython.lib().cfa_get_dim(
             self.__parent_id, self.__cfa_id, pointer(cfa_dim_p)
         )
         if (cfa_err != 0):

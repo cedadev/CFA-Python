@@ -30,7 +30,7 @@ class CFAGroup:
         returns a C_AggregationContainer structure."""
         cfa_cont = C_AggregationContainer()
         cfa_cont_p = pointer(cfa_cont)
-        cfa_err = CFAPython.lib.cfa_get(
+        cfa_err = CFAPython.lib().cfa_get(
             self._cfa_id, pointer(cfa_cont_p)
         )
         if (cfa_err != 0):
@@ -122,13 +122,13 @@ class CFAGroup:
         # serialise the variables - write out the CFA fragments and the aggregation
         # instructions
         for v in self._variables:
-            cfa_err = CFAPython.lib._serialise_cfa_fragments_netcdf(
+            cfa_err = CFAPython.lib()._serialise_cfa_fragments_netcdf(
                 self.nc_id, self.cfa_id, v.cfa_id
             )
             if (cfa_err != 0):
                 raise CFAException(cfa_err)
             
-            cfa_err = CFAPython.lib._serialise_cfa_aggregation_instructions(
+            cfa_err = CFAPython.lib()._serialise_cfa_aggregation_instructions(
                 self.nc_id, v.nc_id, self.cfa_id, v.cfa_id                 
             )
             if (cfa_err != 0):
@@ -142,7 +142,7 @@ class CFAGroup:
         # create the CFA Dimension
         cfa_dim_id = c_int(-1)
         cname = c_char_p(dimname.encode())
-        cfa_err = CFAPython.lib.cfa_def_dim(
+        cfa_err = CFAPython.lib().cfa_def_dim(
             self._cfa_id, cname, size, datatype, pointer(cfa_dim_id)
         )
         if (cfa_err != 0):
@@ -178,7 +178,7 @@ class CFAGroup:
         """Add a variable to the group"""
         cfa_var_id = c_int(-1)
         cname = c_char_p(varname.encode())
-        cfa_err = CFAPython.lib.cfa_def_var(
+        cfa_err = CFAPython.lib().cfa_def_var(
             self._cfa_id, cname, datatype, pointer(cfa_var_id)
         )
         if (cfa_err != 0):
@@ -192,7 +192,7 @@ class CFAGroup:
         d = 0
         for dim in dimensions:
             cdimname = c_char_p(dim.encode())
-            cfa_err = CFAPython.lib.cfa_inq_dim_id(
+            cfa_err = CFAPython.lib().cfa_inq_dim_id(
                 self._cfa_id, cdimname, byref(cfa_dim_ids, sizeof(c_int)*d)
             )
             if (cfa_err != 0):
@@ -200,7 +200,7 @@ class CFAGroup:
             d += 1
 
         # add the AggregatedDimension names to the AggregationVariable 
-        cfa_err = CFAPython.lib.cfa_var_def_dims(
+        cfa_err = CFAPython.lib().cfa_var_def_dims(
             self._cfa_id, cfa_var_id, len(dimensions), cfa_dim_ids
         )
         if (cfa_err != 0):
@@ -234,7 +234,7 @@ class CFAGroup:
         """Create a group in this group and return the group"""
         cfa_grp_id = c_int(-1)
         cname = c_char_p(grpname.encode())
-        cfa_err = CFAPython.lib.cfa_def_cont(
+        cfa_err = CFAPython.lib().cfa_def_cont(
             self._cfa_id, cname, pointer(cfa_grp_id)
         )
         if (cfa_err != 0):
