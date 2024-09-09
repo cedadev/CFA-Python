@@ -15,6 +15,7 @@ class _CFADataset(CFAGroup):
     def __init__(self, filename: str, mode: str='r', 
                  format: CFAFileFormat=CFAFileFormat.CFANetCDF, 
                  nc_object: object=None):
+        
         super().__init__(0, nc_object)
         self.__mode = mode
         self.__format = format
@@ -28,7 +29,7 @@ class _CFADataset(CFAGroup):
             if (self.__mode == "w"):
                 # create the CFA object - this doesn't do any file manipulation yet
                 cfa_id = c_int(0)
-                cfa_err = CFAPython.lib.cfa_create(
+                cfa_err = CFAPython.lib().cfa_create(
                     cpath, c_int(format), byref(cfa_id)
                 )
                 if (cfa_err != 0):
@@ -37,7 +38,7 @@ class _CFADataset(CFAGroup):
             elif (self.__mode == "r"):
                 # get thet netCDF file id from the parent netCDF dataset
                 cfa_id = c_int(0)
-                cfa_err = CFAPython.lib.cfa_load(
+                cfa_err = CFAPython.lib().cfa_load(
                     cpath, c_int(self.nc_id), c_int(format), byref(cfa_id)
                 )
                 if (cfa_err != 0):
@@ -54,7 +55,7 @@ class _CFADataset(CFAGroup):
             # write the global metadata
             self._nc_object.Conventions = f"CFA-{MAJOR_VERSION}.{MINOR_VERSION}.{REVISION}"
         
-        cfa_err = CFAPython.lib.cfa_close(self._cfa_id)
+        cfa_err = CFAPython.lib().cfa_close(self._cfa_id)
         if (cfa_err != 0):
             raise CFAException(cfa_err)
 

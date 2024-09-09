@@ -12,6 +12,7 @@ from CFAPython.version import MAJOR_VERSION, MINOR_VERSION, REVISION
 CFA_C_VERSION_TAG = "0.6.1"
 
 CFA_C_URL = "https://github.com/cedadev/CFA-C/archive/refs/tags/"
+CFA_C_LOCAL = os.path.expanduser("~/cfa-c")
 
 # create a temporary directory to store the downloaded CFA-C source code
 # it has to be global so that the tmp_dir object doesn't go out of scope and 
@@ -37,7 +38,9 @@ def fetch_cfa_c_source_local():
 def get_netcdf_library_path_mac():
     lib_dirs = []
     for s in site.getsitepackages():
-        lib_dir = os.path.join(s, "netCDF4/.dylibs")
+        lib_dir = os.path.join(s, "netCDF4/.dylib")
+        if not os.path.exists(lib_dir):
+            lib_dir = os.path.join(s, "netCDF4")
         lib_dirs.append(lib_dir)
     return lib_dirs
 
@@ -68,7 +71,7 @@ def get_netcdf_libraries():
 
 def build_cfa_extension():
     # fetch the CFA-C source code from GitHub or local
-    if True:
+    if False:
         fetch_cfa_c_source_local()
     else:
         fetch_cfa_c_source()
@@ -111,6 +114,7 @@ if __name__ == "__main__":
         long_description = '''
     Python bindings for the CFA-C library.
     ''',
+        install_requires=["netCDF4"],
         packages=["CFAPython"],
         ext_modules = build_cfa_extension()
     )

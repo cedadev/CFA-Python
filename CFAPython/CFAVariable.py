@@ -29,7 +29,7 @@ class CFAVariable:
         Hidden as we don't users to access this method."""
         cfa_var = CFADatatypes.C_AggregationVariable()
         cfa_var_p = pointer(cfa_var)
-        cfa_err = CFAPython.lib.cfa_get_var(
+        cfa_err = CFAPython.lib().cfa_get_var(
             self.__parent_id, self.__cfa_id, pointer(cfa_var_p)
         )
         if (cfa_err != 0):
@@ -92,7 +92,7 @@ class CFAVariable:
             cdata = c_char_p(value[0].encode())
             cscalar = value[1]
             ctype = c_int(value[2])
-            cfa_err = CFAPython.lib.cfa_var_def_agg_instr(
+            cfa_err = CFAPython.lib().cfa_var_def_agg_instr(
                 self.__parent_id, self.__cfa_id,
                 cterm, cdata, cscalar, ctype
             )
@@ -109,7 +109,7 @@ class CFAVariable:
                 frag_def_c[d] = frag_def[d]
         else:
             frag_def_c = None
-        cfa_err = CFAPython.lib.cfa_var_def_frag_num(
+        cfa_err = CFAPython.lib().cfa_var_def_frag_num(
             self.__parent_id, self.__cfa_id, frag_def_c
         )
         if (cfa_err != 0):
@@ -140,7 +140,7 @@ class CFAVariable:
             c_agg_instr = CFADatatypes.C_AggregationInstruction()
             c_agg_instr_p = pointer(c_agg_instr)
             # get the AggregationInstruction type
-            cfa_err = CFAPython.lib.cfa_var_get_agg_instr(
+            cfa_err = CFAPython.lib().cfa_var_get_agg_instr(
                 self.__parent_id, self.__cfa_id,
                 cterm, pointer(c_agg_instr_p)
             )
@@ -183,7 +183,7 @@ class CFAVariable:
                 # not a type error
                 raise CFAException(-504)
 
-            cfa_err = CFAPython.lib.cfa_var_put1_frag(
+            cfa_err = CFAPython.lib().cfa_var_put1_frag(
                     self.__parent_id, self.__cfa_id,
                     frag_loc_c, data_loc_c,
                     cterm, cdata, length
@@ -219,7 +219,7 @@ class CFAVariable:
             # get the fragment definition
             frag_dim = CFADatatypes.C_FragmentDimension()
             frag_dim_p = pointer(frag_dim)
-            cfa_err = CFAPython.lib.cfa_var_get_frag_dim(
+            cfa_err = CFAPython.lib().cfa_var_get_frag_dim(
                     self.__parent_id, self.__cfa_id, d, pointer(frag_dim_p)
             )
             if (cfa_err != 0):
@@ -264,7 +264,7 @@ class CFAVariable:
 
         # Get the index - this is outside the terms
         cdata = (c_size_t * self.ndims)(0)
-        cfa_err = CFAPython.lib.cfa_var_get1_frag(
+        cfa_err = CFAPython.lib().cfa_var_get1_frag(
             self.__parent_id, self.__cfa_id, frag_loc_c, data_loc_c,
             "index".encode(), cdata,
         )
@@ -282,7 +282,7 @@ class CFAVariable:
                 # Get the location (in the Aggregated Data)
                 data_loc_dims = 2 * self.ndims
                 cdata = (c_size_t * data_loc_dims)(0)
-                cfa_err = CFAPython.lib.cfa_var_get1_frag(
+                cfa_err = CFAPython.lib().cfa_var_get1_frag(
                     self.__parent_id, self.__cfa_id, frag_loc_c, data_loc_c,
                     cterm, cdata,
                 )
@@ -319,7 +319,7 @@ class CFAVariable:
                     # not a type error
                     raise CFAException(-504)
                 
-                cfa_err = CFAPython.lib.cfa_var_get1_frag(
+                cfa_err = CFAPython.lib().cfa_var_get1_frag(
                     self.__parent_id, self.__cfa_id, frag_loc_c, data_loc_c,
                     cterm, pointer(cdata)
                 )
