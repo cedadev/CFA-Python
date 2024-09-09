@@ -38,3 +38,7 @@ no longer required to compile the CFA-C library themselves.
 1. Run the example in "load" mode to load and view the file
 
         python tests/examples/example1a.py L
+
+1. The file is created at:
+ 
+        examples/test/example1a.nc
