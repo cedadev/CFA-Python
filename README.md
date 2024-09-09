@@ -31,6 +31,10 @@ no longer required to compile the CFA-C library themselves.
         cd CFA-Python
         pip install ./
 
-1. Run the example
+1. Run the example in "save" mode to create a file
 
-        python tests/examples/example1.py
+        python tests/examples/example1a.py S
+
+1. Run the example in "load" mode to load and view the file
+
+        python tests/examples/example1a.py L
